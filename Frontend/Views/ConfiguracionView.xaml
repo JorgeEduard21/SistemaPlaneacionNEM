@@ -1,0 +1,322 @@
+<UserControl x:Class="Frontend.Views.ConfiguracionView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="850" d:DesignWidth="1000">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="20,10,30,40">
+        <StackPanel MaxWidth="920" HorizontalAlignment="Center">
+            
+            <!-- Título y descripción -->
+            <TextBlock Text="⚙️ Configuración del Sistema" FontSize="30" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia" Margin="0,0,0,6"/>
+            <TextBlock Text="Gestiona el perfil de tu grupo para no tener que rellenarlo en cada planeación, y administra tu API Key de Gemini."
+                       FontSize="15" Foreground="#5C5C5C" Margin="0,0,0,25"/>
+
+            <!-- Selector de subsecciones (Pestañas) -->
+            <Border Background="#F1EAE1" CornerRadius="10" Padding="4" Margin="0,0,0,25" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal">
+                    <RadioButton Content="👥 Perfil del Grupo (Contexto)" GroupName="SubMenuConfig" 
+                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=0, Mode=OneWay}"
+                                 Command="{Binding DataContext.ConfiguracionVM.DescartarCambiosCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                 Style="{StaticResource ChipRadioButton}" Margin="0,0,5,0"/>
+                    <RadioButton Content="🔑 API Key y Modelo Gemini" GroupName="SubMenuConfig" 
+                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=1, Mode=OneWay}"
+                                 Style="{StaticResource ChipRadioButton}" Margin="0"/>
+                </StackPanel>
+            </Border>
+
+            <!-- ============================================================== -->
+            <!-- SUBSECCIÓN 0: PERFIL DEL GRUPO (CONTEXTO PERMANENTE)           -->
+            <!-- ============================================================== -->
+            <StackPanel Visibility="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=0}">
+                
+                <!-- Tarjeta de estado de actualización -->
+                <Border Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" CornerRadius="10" Padding="15,12" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="💡" FontSize="20" Margin="0,0,12,0" VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding UltimaActualizacion}" FontWeight="Bold" Foreground="#166534" FontSize="14"/>
+                            <TextBlock Text="Estos datos se usarán automáticamente cada vez que crees una planeación didáctica. Modifícalos si cambias de ciclo, grupo o si se incorporan alumnos."
+                                       Foreground="#15803D" FontSize="13" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <!-- Botón Guardar cambios superior -->
+                        <Button Grid.Column="2" Content="Guardar Perfil" Command="{Binding GuardarPerfilCommand}" Style="{StaticResource BotonNaranja}" Padding="20,8" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <!-- Tarjeta 1: Datos Docente y Escuela -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="DATOS DE LA ESCUELA Y DOCENTE" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,20"/>
+                        
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="150"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Nombre del Docente" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding NombreDocente, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Mtro. Juan Pérez"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Escuela Primaria" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding Escuela, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Esc. Benito Juárez"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="4">
+                                <TextBlock Text="Ciclo Escolar" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding CicloEscolar, UpdateSourceTrigger=PropertyChanged}" Tag="2026-2027"/>
+                            </StackPanel>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta 2: Grados y Entorno -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="INFORMACIÓN DEL GRUPO" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,20"/>
+                        
+                        <TextBlock Text="Grado(s) que atiendes" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <ItemsControl ItemsSource="{Binding Grados.Opciones}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Margin="0,0,0,15"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Content="{Binding Nombre}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Style="{StaticResource ChipToggle}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="20"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Número total de alumnos" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding CantidadAlumnos, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. 28"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Región / Localidad" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding Region, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Valles Centrales, Oaxaca"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <TextBlock Text="Entorno sociocultural" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <ItemsControl ItemsSource="{Binding Entornos.Opciones}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <WrapPanel Margin="0,0,0,10"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton Content="{Binding Nombre}" IsChecked="{Binding IsSelected, Mode=TwoWay}" Style="{StaticResource ChipToggle}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta 3: Estilos de Aprendizaje VARK -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="ESTILOS DE APRENDIZAJE PREDOMINANTES (VARK)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        <ItemsControl ItemsSource="{Binding Vark.Opciones}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="4" Rows="1"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <ToggleButton IsChecked="{Binding IsSelected, Mode=TwoWay}" Style="{StaticResource TarjetaVARK}" Margin="0,0,12,0">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Icono}" FontSize="26" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+                                            <TextBlock Text="{Binding Nombre}" FontWeight="Bold" FontSize="13" HorizontalAlignment="Center"/>
+                                        </StackPanel>
+                                    </ToggleButton>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta 4: Barreras para el Aprendizaje (BAP) -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="BARRERAS PARA EL APRENDIZAJE Y LA PARTICIPACIÓN (BAP)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        <TextBlock Text="¿Hay barreras identificadas en tu grupo de alumnos?" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding Barreras.Nuevo, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Discapacidad visual, Rezago en lectoescritura..." Margin="0"/>
+                            <Button Grid.Column="2" Content="Agregar BAP" Command="{Binding Barreras.AgregarCommand}" Style="{StaticResource BotonNaranja}" Height="45" Padding="20,0"/>
+                        </Grid>
+                        
+                        <!-- Lista de BAP agregadas -->
+                        <ItemsControl ItemsSource="{Binding Barreras.Elementos}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" FontSize="13" Foreground="#334155"/>
+                                            <Button Grid.Column="1" Content="✕" 
+                                                    Command="{Binding DataContext.Barreras.QuitarCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Background="Transparent" BorderThickness="0" Foreground="#EF4444" FontWeight="Bold" Cursor="Hand" Padding="8,2"/>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta 5: Características del Desarrollo -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="CARACTERÍSTICAS DEL DESARROLLO DEL GRUPO" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        <TextBlock Text="Describe rasgos generales (socioemocionales, convivencia, intereses especiales)" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding Caracteristicas, UpdateSourceTrigger=PropertyChanged}" Height="90" TextWrapping="Wrap" AcceptsReturn="True"
+                                 Tag="Ej. Grupo participativo y dinámico con gusto por las actividades al aire libre..." Margin="0"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Mensaje de error si falla la validación -->
+                <TextBlock Text="{Binding ErrorPerfil}" Foreground="#DC2626" FontWeight="Bold" FontSize="14" Margin="0,0,0,15"
+                           Visibility="{Binding ErrorPerfil, Converter={StaticResource NullOrEmptyToVis}}"/>
+
+                <!-- Botones inferiores para guardar -->
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,30">
+                    <Button Content="Descartar Cambios" Command="{Binding DescartarCambiosCommand}" Style="{StaticResource BotonGris}" Margin="0,0,15,0"/>
+                    <Button Content="Guardar Perfil del Grupo ✓" Command="{Binding GuardarPerfilCommand}" Style="{StaticResource BotonNaranja}" Padding="30,14" FontSize="15"/>
+                </StackPanel>
+
+            </StackPanel>
+
+            <!-- ============================================================== -->
+            <!-- SUBSECCIÓN 1: API KEY Y MODELO GEMINI                          -->
+            <!-- ============================================================== -->
+            <StackPanel Visibility="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=1}">
+
+                <!-- Tarjeta Estado Actual de la API Key -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="ESTADO DE LA API KEY DE GEMINI" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        
+                        <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+                            <StackPanel>
+                                <TextBlock Text="{Binding EstadoApiKeyTexto}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                <TextBlock Text="Tu clave se almacena de forma segura y cifrada en tu equipo local con Windows DPAPI (o a través del archivo de entorno)."
+                                           FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+
+                        <TextBlock Text="Ingresar o Modificar API Key" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding ApiKeyInput, UpdateSourceTrigger=PropertyChanged}" Tag="Pega aquí tu clave: AIzaSy..." Margin="0"/>
+                            <Button Grid.Column="2" Content="Probar Conexión" Command="{Binding ProbarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="15,0" Height="45"/>
+                            <Button Grid.Column="4" Content="Guardar Clave" Command="{Binding GuardarApiKeyCommand}" Style="{StaticResource BotonNaranja}" Padding="20,0" Height="45"/>
+                        </Grid>
+
+                        <!-- Mensaje de prueba de la API Key -->
+                        <Border Visibility="{Binding ResultadoPrueba, Converter={StaticResource NullOrEmptyToVis}}"
+                                CornerRadius="8" Padding="12" Margin="0,0,0,15"
+                                Background="{Binding ResultadoPrueba.Valida, Converter={StaticResource BoolToVis}}">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="#FEF2F2"/>
+                                    <Setter Property="BorderBrush" Value="#F87171"/>
+                                    <Setter Property="BorderThickness" Value="1"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ResultadoPrueba.Valida}" Value="True">
+                                            <Setter Property="Background" Value="#F0FDF4"/>
+                                            <Setter Property="BorderBrush" Value="#86EFAC"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <TextBlock Text="{Binding ResultadoPrueba.Mensaje}" FontSize="13" FontWeight="SemiBold">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Foreground" Value="#B91C1C"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ResultadoPrueba.Valida}" Value="True">
+                                                <Setter Property="Foreground" Value="#15803D"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Border>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                            <Button Content="Obtener API Key Gratis en Google AI Studio ↗" Command="{Binding AbrirAiStudioCommand}"
+                                    Background="Transparent" BorderThickness="0" Foreground="#2563EB" FontWeight="Bold" Cursor="Hand" Margin="0,0,25,0"/>
+                            <Button Content="Eliminar Clave Guardada" Command="{Binding EliminarApiKeyCommand}"
+                                    Background="Transparent" BorderThickness="0" Foreground="#DC2626" Cursor="Hand"
+                                    Visibility="{Binding Estado.ApiKeyOrigen, Converter={StaticResource EqToVis}, ConverterParameter=usuario}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta Selección de Modelo Gemini -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="MODELO DE INTELIGENCIA ARTIFICIAL" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        <TextBlock Text="Selecciona el modelo de Gemini para procesar las planeaciones" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,10"/>
+                        
+                        <ComboBox ItemsSource="{Binding Modelos}" SelectedValuePath="Id" DisplayMemberPath="Nombre"
+                                  SelectedValue="{Binding ModeloSeleccionado, Mode=TwoWay}"
+                                  Height="42" FontSize="14" Padding="10,8" Margin="0,0,0,15" Background="White"/>
+
+                        <TextBlock Text="Recomendado: Gemini 3.8 Flash ofrece la mejor combinación de velocidad, coherencia pedagógica y límites de uso amplios."
+                                   FontSize="12" Foreground="{StaticResource ColorTextoSecundario}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta Datos Locales -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <TextBlock Text="ALMACENAMIENTO LOCAL" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,10"/>
+                        <TextBlock Text="Tus planeaciones e historial se guardan en tu propia computadora, sin depender de servidores externos."
+                                   FontSize="13" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,12"/>
+                        <Button Content="Abrir Carpeta de Datos en el Explorador 📁" Command="{Binding AbrirCarpetaDatosCommand}"
+                                Style="{StaticResource BotonGris}" HorizontalAlignment="Left" Padding="18,10"/>
+                    </StackPanel>
+                </Border>
+
+            </StackPanel>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>
+
