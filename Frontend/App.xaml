@@ -11,25 +11,77 @@
         <conv:EqualityToVisibilityConverter x:Key="EqToVis"/>
         <conv:NullOrEmptyToVisibilityConverter x:Key="NullOrEmptyToVis"/>
         <conv:NullOrEmptyToVisibilityConverter x:Key="InverseNullOrEmptyToVis" Invertir="True"/>
+        <conv:EqualityToBoolConverter x:Key="EqToBool"/>
+
+        <!-- Fuente con respaldo de emojis: así los iconos (📝 ⚙️ 📂 👥 🔑 ...) siempre se dibujan -->
+        <FontFamily x:Key="FuenteApp">Segoe UI, Segoe UI Emoji, Segoe UI Symbol</FontFamily>
 
         <!-- Paleta de Colores Base -->
         <SolidColorBrush x:Key="ColorFondo" Color="#FDF8F2"/>
         <SolidColorBrush x:Key="ColorPrimario" Color="#C25A38"/>
+        <SolidColorBrush x:Key="ColorPrimarioHover" Color="#A94A2C"/>
+        <SolidColorBrush x:Key="ColorPrimarioSuave" Color="#FFF2EB"/>
         <SolidColorBrush x:Key="ColorTextoPrincipal" Color="#334155"/>
         <SolidColorBrush x:Key="ColorTextoSecundario" Color="#94A3B8"/>
         <SolidColorBrush x:Key="ColorBorde" Color="#E5D8C5"/>
+        <LinearGradientBrush x:Key="GradientePrimario" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#D9714B" Offset="0"/>
+            <GradientStop Color="#B24E2F" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Fuente global para ventanas y controles de usuario -->
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="{StaticResource FuenteApp}"/>
+        </Style>
+        <Style TargetType="UserControl">
+            <Setter Property="FontFamily" Value="{StaticResource FuenteApp}"/>
+        </Style>
 
         <!-- Estilo Tarjeta Contenedora -->
         <Style x:Key="TarjetaFigma" TargetType="Border">
             <Setter Property="Background" Value="White"/>
             <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
             <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="CornerRadius" Value="12"/>
+            <Setter Property="CornerRadius" Value="16"/>
             <Setter Property="Padding" Value="25"/>
             <Setter Property="Margin" Value="0,0,0,20"/>
             <Setter Property="Effect">
                 <Setter.Value>
-                    <DropShadowEffect BlurRadius="10" ShadowDepth="2" Color="#E2E8F0" Opacity="0.5"/>
+                    <DropShadowEffect BlurRadius="18" ShadowDepth="3" Direction="270" Color="#B9A58C" Opacity="0.18"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Pestañas segmentadas (selector de subsecciones) -->
+        <Style x:Key="TabSegmento" TargetType="RadioButton">
+            <Setter Property="Foreground" Value="#6B5E50"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="18,10"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Fondo" Background="Transparent" CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Fondo" Property="Background" Value="#E9DFD2"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Fondo" Property="Background" Value="White"/>
+                                <Setter Property="Foreground" Value="{StaticResource ColorPrimario}"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                                <Setter TargetName="Fondo" Property="Effect">
+                                    <Setter.Value>
+                                        <DropShadowEffect BlurRadius="8" ShadowDepth="1" Direction="270" Color="#8C7358" Opacity="0.25"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
                 </Setter.Value>
             </Setter>
         </Style>
@@ -58,6 +110,10 @@
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ColorPrimarioSuave}"/>
+                                <Setter Property="BorderBrush" Value="#E8A88E"/>
+                            </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter Property="Background" Value="{StaticResource ColorPrimario}"/>
                                 <Setter Property="Foreground" Value="White"/>
@@ -88,6 +144,10 @@
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource ColorPrimarioSuave}"/>
+                                <Setter Property="BorderBrush" Value="#E8A88E"/>
+                            </Trigger>
                             <Trigger Property="IsChecked" Value="True">
                                 <Setter Property="Background" Value="{StaticResource ColorPrimario}"/>
                                 <Setter Property="Foreground" Value="White"/>
@@ -129,12 +189,25 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="Button">
-                        <Border Background="{TemplateBinding Background}" CornerRadius="8">
+                        <Border x:Name="Fondo" Background="{StaticResource GradientePrimario}" CornerRadius="10" RenderTransformOrigin="0.5,0.5">
+                            <Border.Effect>
+                                <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#C25A38" Opacity="0.30"/>
+                            </Border.Effect>
                             <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="Fondo" Property="Background" Value="{StaticResource ColorPrimarioHover}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Fondo" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.97" ScaleY="0.97"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter TargetName="Fondo" Property="Opacity" Value="0.45"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

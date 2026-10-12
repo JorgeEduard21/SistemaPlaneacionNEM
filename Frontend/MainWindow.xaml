@@ -7,7 +7,10 @@
         Height="900" Width="1200" 
         MinHeight="750" MinWidth="1000"
         WindowStartupLocation="CenterScreen"
-        Background="#FDF8F2">
+        Background="#FDF8F2"
+        FontFamily="{StaticResource FuenteApp}"
+        TextOptions.TextFormattingMode="Display"
+        UseLayoutRounding="True">
 
     <Window.DataContext>
         <vm:MainViewModel/>
@@ -36,7 +39,12 @@
 
                 <!-- Logo / Título de la Aplicación -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="🇲🇽" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                    <Border Width="44" Height="44" CornerRadius="12" Background="{StaticResource GradientePrimario}" Margin="0,0,12,0" VerticalAlignment="Center">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#C25A38" Opacity="0.35"/>
+                        </Border.Effect>
+                        <TextBlock Text="📚" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Planeación Didáctica NEM" FontSize="18" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia"/>
                         <TextBlock Text="Plan de Estudios 2022 · Educación Primaria" FontSize="12" Foreground="{StaticResource ColorTextoSecundario}"/>

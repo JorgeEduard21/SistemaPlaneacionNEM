@@ -15,15 +15,14 @@
                        FontSize="15" Foreground="#5C5C5C" Margin="0,0,0,25"/>
 
             <!-- Selector de subsecciones (Pestañas) -->
-            <Border Background="#F1EAE1" CornerRadius="10" Padding="4" Margin="0,0,0,25" HorizontalAlignment="Left">
+            <Border Background="#F1EAE1" CornerRadius="14" Padding="5" Margin="0,0,0,25" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton Content="👥 Perfil del Grupo (Contexto)" GroupName="SubMenuConfig" 
-                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=0, Mode=OneWay}"
-                                 Command="{Binding DataContext.ConfiguracionVM.DescartarCambiosCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
-                                 Style="{StaticResource ChipRadioButton}" Margin="0,0,5,0"/>
-                    <RadioButton Content="🔑 API Key y Modelo Gemini" GroupName="SubMenuConfig" 
-                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=1, Mode=OneWay}"
-                                 Style="{StaticResource ChipRadioButton}" Margin="0"/>
+                    <RadioButton Content="👥  Perfil del Grupo (Contexto)" GroupName="SubMenuConfig" 
+                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToBool}, ConverterParameter=0, Mode=TwoWay}"
+                                 Style="{StaticResource TabSegmento}" Margin="0,0,4,0"/>
+                    <RadioButton Content="🔑  API Key y Modelo Gemini" GroupName="SubMenuConfig" 
+                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToBool}, ConverterParameter=1, Mode=TwoWay}"
+                                 Style="{StaticResource TabSegmento}" Margin="0"/>
                 </StackPanel>
             </Border>
 
