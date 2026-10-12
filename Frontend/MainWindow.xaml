@@ -533,12 +533,12 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#7C3AED" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                        <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10" Background="#F5EEFD" BorderBrush="#E9D5FF" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
                                                             <TextBlock Text="☑️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         </Border>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="Lista de Cotejo" FontSize="15" FontWeight="Bold"/>
-                                                            <TextBlock Text="Registra la presencia o ausencia de criterios específicos." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                            <TextBlock Text="Lista de Cotejo" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Registra la presencia o ausencia de criterios específicos." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </RadioButton>
@@ -550,12 +550,12 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#E0E7FF" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                        <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10" Background="#FEF3C7" BorderBrush="#FDE68A" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
                                                             <TextBlock Text="📊" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         </Border>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="Rúbrica" FontSize="15" FontWeight="Bold"/>
-                                                            <TextBlock Text="Describe niveles de desempeño para cada criterio." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                            <TextBlock Text="Rúbrica" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Describe niveles de desempeño para cada criterio." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </RadioButton>
@@ -567,12 +567,12 @@
                                                             <ColumnDefinition Width="Auto"/>
                                                             <ColumnDefinition Width="*"/>
                                                         </Grid.ColumnDefinitions>
-                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#E0F2FE" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                        <Border Grid.Column="0" Width="42" Height="42" CornerRadius="10" Background="#E0F2FE" BorderBrush="#BAE6FD" BorderThickness="1" Margin="0,0,14,0" VerticalAlignment="Center">
                                                             <TextBlock Text="🔍" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                         </Border>
                                                         <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                            <TextBlock Text="Guía de Observación" FontSize="15" FontWeight="Bold"/>
-                                                            <TextBlock Text="Guía estructurada para observar actitudes y habilidades." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                            <TextBlock Text="Guía de Observación" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Guía estructurada para observar actitudes y habilidades." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                                                         </StackPanel>
                                                     </Grid>
                                                 </RadioButton>

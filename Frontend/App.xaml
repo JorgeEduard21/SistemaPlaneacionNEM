@@ -161,7 +161,9 @@
         
         <!-- Estilo Inputs de Texto -->
         <Style x:Key="TextBoxElegante" TargetType="TextBox">
-            <Setter Property="Padding" Value="15,10"/>
+            <Setter Property="Padding" Value="14,10"/>
+            <Setter Property="MinHeight" Value="44"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Background" Value="#FCFCFC"/>
@@ -171,9 +173,27 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="8" Background="{TemplateBinding Background}">
-                            <ScrollViewer x:Name="PART_ContentHost"/>
+                        <Border x:Name="Borde" BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="8" 
+                                Background="{TemplateBinding Background}"
+                                Padding="{TemplateBinding Padding}">
+                            <ScrollViewer x:Name="PART_ContentHost" 
+                                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}" 
+                                          Focusable="False" 
+                                          HorizontalScrollBarVisibility="Hidden" 
+                                          VerticalScrollBarVisibility="Hidden"/>
                         </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="#D4A373"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="Borde" Property="BorderThickness" Value="1.5"/>
+                                <Setter TargetName="Borde" Property="Background" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
                     </ControlTemplate>
                 </Setter.Value>
             </Setter>
@@ -299,14 +319,14 @@
             </Setter>
         </Style>
 
-        <!-- Estilo Tarjeta Instrumentos (con Checkmark a la derecha cuando se selecciona) -->
+        <!-- Estilo Tarjeta Instrumentos (Limpia, elegante, con checkmark y sin oscurecerse) -->
         <Style x:Key="TarjetaInstrumento" TargetType="RadioButton">
             <Setter Property="Background" Value="#FCFCFC"/>
             <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
             <Setter Property="BorderThickness" Value="1.5"/>
-            <Setter Property="Padding" Value="20,16"/>
-            <Setter Property="Margin" Value="0,0,0,14"/>
+            <Setter Property="Padding" Value="18,16"/>
+            <Setter Property="Margin" Value="0,0,0,12"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
@@ -321,8 +341,12 @@
                                     <ColumnDefinition Width="Auto"/>
                                 </Grid.ColumnDefinitions>
                                 <ContentPresenter Grid.Column="0" VerticalAlignment="Center"/>
-                                <TextBlock x:Name="CheckMark" Grid.Column="1" Text="✓" FontSize="20" FontWeight="Bold" Foreground="White" 
-                                           VerticalAlignment="Center" Margin="15,0,5,0" Visibility="Collapsed"/>
+                                <!-- Checkmark dentro de un círculo elegante a la derecha -->
+                                <Border x:Name="CheckCirculo" Grid.Column="1" Width="26" Height="26" CornerRadius="13" 
+                                        Background="{StaticResource ColorPrimario}" VerticalAlignment="Center" Margin="15,0,5,0" Visibility="Collapsed">
+                                    <TextBlock Text="✓" FontSize="14" FontWeight="Bold" Foreground="White" 
+                                               HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,-1,0,0"/>
+                                </Border>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -331,10 +355,10 @@
                                 <Setter TargetName="Borde" Property="Background" Value="#FFFDF9"/>
                             </Trigger>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Borde" Property="Background" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="Borde" Property="Background" Value="#FFF5EE"/>
                                 <Setter TargetName="Borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                <Setter TargetName="Borde" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="CheckCirculo" Property="Visibility" Value="Visible"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
