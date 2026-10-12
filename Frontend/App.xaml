@@ -270,58 +270,28 @@
             <Setter Property="Background" Value="#FCFCFC"/>
             <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="15"/>
-            <Setter Property="Margin" Value="0,0,15,15"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="18,16"/>
+            <Setter Property="Margin" Value="0,0,14,14"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="RadioButton">
-                        <Border Background="{TemplateBinding Background}" 
+                        <Border x:Name="Borde" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="12" Padding="{TemplateBinding Padding}">
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
                             <ContentPresenter/>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="#FFF2EB"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
-                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.8"/>
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="Borde" Property="Background" Value="#FFFDF9"/>
                             </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-        <!-- Estilo Tarjeta Instrumentos (Naranja Sólido) -->
-        <Style x:Key="TarjetaInstrumento" TargetType="RadioButton">
-            <Setter Property="Background" Value="#FCFCFC"/>
-            <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
-            <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="20,15"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border Background="{TemplateBinding Background}" 
-                                BorderBrush="{TemplateBinding BorderBrush}" 
-                                BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="12" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
                             <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="{StaticResource ColorPrimario}"/>
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="Borde" Property="Background" Value="#FFF2EB"/>
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="Borde" Property="BorderThickness" Value="2"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
@@ -329,33 +299,89 @@
             </Setter>
         </Style>
 
-        <!-- Estilo Tarjeta Materiales (Verde Sólido) -->
+        <!-- Estilo Tarjeta Instrumentos (con Checkmark a la derecha cuando se selecciona) -->
+        <Style x:Key="TarjetaInstrumento" TargetType="RadioButton">
+            <Setter Property="Background" Value="#FCFCFC"/>
+            <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border x:Name="Borde" Background="{TemplateBinding Background}" 
+                                BorderBrush="{TemplateBinding BorderBrush}" 
+                                BorderThickness="{TemplateBinding BorderThickness}" 
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" VerticalAlignment="Center"/>
+                                <TextBlock x:Name="CheckMark" Grid.Column="1" Text="✓" FontSize="20" FontWeight="Bold" Foreground="White" 
+                                           VerticalAlignment="Center" Margin="15,0,5,0" Visibility="Collapsed"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="Borde" Property="Background" Value="#FFFDF9"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Borde" Property="Background" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Tarjeta Materiales (con radio/checkbox visual indicador circular a la derecha) -->
         <Style x:Key="TarjetaMaterial" TargetType="CheckBox">
             <Setter Property="Background" Value="#FCFCFC"/>
             <Setter Property="Foreground" Value="{StaticResource ColorTextoPrincipal}"/>
             <Setter Property="BorderBrush" Value="{StaticResource ColorBorde}"/>
-            <Setter Property="BorderThickness" Value="1"/>
-            <Setter Property="Padding" Value="20,15"/>
-            <Setter Property="Margin" Value="0,0,0,12"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Padding" Value="20,16"/>
+            <Setter Property="Margin" Value="0,0,0,14"/>
             <Setter Property="Cursor" Value="Hand"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="CheckBox">
-                        <Border Background="{TemplateBinding Background}" 
+                        <Border x:Name="Borde" Background="{TemplateBinding Background}" 
                                 BorderBrush="{TemplateBinding BorderBrush}" 
                                 BorderThickness="{TemplateBinding BorderThickness}" 
-                                CornerRadius="12" Padding="{TemplateBinding Padding}">
-                            <ContentPresenter/>
+                                CornerRadius="14" Padding="{TemplateBinding Padding}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Grid.Column="0" VerticalAlignment="Center"/>
+                                <!-- Indicador circular estilo switch / radio visual -->
+                                <Border x:Name="Indicador" Grid.Column="1" Width="24" Height="24" CornerRadius="12" 
+                                        BorderBrush="{StaticResource ColorBorde}" BorderThickness="2" Background="White"
+                                        VerticalAlignment="Center" Margin="15,0,5,0">
+                                    <Ellipse x:Name="PuntoInterior" Width="12" Height="12" Fill="{StaticResource ColorPrimario}" Visibility="Collapsed"/>
+                                </Border>
+                            </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter Property="Background" Value="#49755B"/>
-                                <!-- Verde oscuro -->
-                                <Setter Property="Foreground" Value="White"/>
-                                <Setter Property="BorderBrush" Value="#49755B"/>
-                            </Trigger>
                             <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Opacity" Value="0.9"/>
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="#D4A373"/>
+                                <Setter TargetName="Borde" Property="Background" Value="#FFFDF9"/>
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="Borde" Property="Background" Value="#FFF8F3"/>
+                                <Setter TargetName="Borde" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="Indicador" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                <Setter TargetName="PuntoInterior" Property="Visibility" Value="Visible"/>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

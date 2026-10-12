@@ -4,7 +4,7 @@
         xmlns:vm="clr-namespace:Frontend.ViewModels"
         xmlns:views="clr-namespace:Frontend.Views"
         Title="Sistema de Planeación NEM — Plan de Estudios 2022" 
-        Height="900" Width="1200" 
+        Height="800" Width="1200" 
         MinHeight="750" MinWidth="1000"
         WindowStartupLocation="CenterScreen"
         Background="#FDF8F2"
@@ -39,12 +39,7 @@
 
                 <!-- Logo / Título de la Aplicación -->
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Border Width="44" Height="44" CornerRadius="12" Background="{StaticResource GradientePrimario}" Margin="0,0,12,0" VerticalAlignment="Center">
-                        <Border.Effect>
-                            <DropShadowEffect BlurRadius="10" ShadowDepth="2" Direction="270" Color="#C25A38" Opacity="0.35"/>
-                        </Border.Effect>
-                        <TextBlock Text="📚" FontSize="22" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                    </Border>
+                    <TextBlock Text="🇲🇽" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0"/>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Planeación Didáctica NEM" FontSize="18" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia"/>
                         <TextBlock Text="Plan de Estudios 2022 · Educación Primaria" FontSize="12" Foreground="{StaticResource ColorTextoSecundario}"/>
@@ -305,17 +300,16 @@
                                             <TextBlock Text="CAMPO FORMATIVO" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <UniformGrid Columns="2" Rows="2">
                                                 <RadioButton Content="Lenguajes" GroupName="CampoFormativo" Style="{StaticResource ChipToggle}"
-                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToVis}, ConverterParameter=Lenguajes, Mode=OneWay}"
-                                                             Command="{Binding DataContext.CampoFormativo, RelativeSource={RelativeSource AncestorType=Window}}"
+                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToBool}, ConverterParameter=Lenguajes, Mode=TwoWay}"
                                                              HorizontalContentAlignment="Left" Padding="20,14"/>
                                                 <RadioButton Content="Saberes y Pensamiento Científico" GroupName="CampoFormativo" Style="{StaticResource ChipToggle}"
-                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToVis}, ConverterParameter='Saberes y Pensamiento Científico', Mode=OneWay}"
+                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToBool}, ConverterParameter='Saberes y Pensamiento Científico', Mode=TwoWay}"
                                                              HorizontalContentAlignment="Left" Padding="20,14"/>
                                                 <RadioButton Content="Ética, Naturaleza y Sociedades" GroupName="CampoFormativo" Style="{StaticResource ChipToggle}"
-                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToVis}, ConverterParameter='Ética, Naturaleza y Sociedades', Mode=OneWay}"
+                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToBool}, ConverterParameter='Ética, Naturaleza y Sociedades', Mode=TwoWay}"
                                                              HorizontalContentAlignment="Left" Padding="20,14"/>
                                                 <RadioButton Content="De lo Humano y lo Comunitario" GroupName="CampoFormativo" Style="{StaticResource ChipToggle}"
-                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToVis}, ConverterParameter='De lo Humano y lo Comunitario', Mode=OneWay}"
+                                                             IsChecked="{Binding CampoFormativo, Converter={StaticResource EqToBool}, ConverterParameter='De lo Humano y lo Comunitario', Mode=TwoWay}"
                                                              HorizontalContentAlignment="Left" Padding="20,14"/>
                                             </UniformGrid>
                                         </StackPanel>
@@ -425,14 +419,62 @@
                                         <StackPanel>
                                             <TextBlock Text="METODOLOGÍA DIDÁCTICA SOCiOCRÍTICA" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <UniformGrid Columns="2" Rows="2">
-                                                <RadioButton Content="Proyectos Comunitarios" GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
-                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToVis}, ConverterParameter='Proyectos Comunitarios', Mode=OneWay}"/>
-                                                <RadioButton Content="Aprendizaje Basado en Problemas" GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
-                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToVis}, ConverterParameter='Aprendizaje Basado en Problemas', Mode=OneWay}"/>
-                                                <RadioButton Content="STEAM" GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
-                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToVis}, ConverterParameter=STEAM, Mode=OneWay}"/>
-                                                <RadioButton Content="Aprendizaje-Servicio" GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
-                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToVis}, ConverterParameter=Aprendizaje-Servicio, Mode=OneWay}"/>
+                                                <RadioButton GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
+                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToBool}, ConverterParameter=STEAM, Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="🔬" FontSize="26" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="STEAM" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Ciencia, Tecnología, Ingeniería, Arte y Matemáticas integradas." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
+                                                <RadioButton GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
+                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToBool}, ConverterParameter='Aprendizaje Basado en Problemas', Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="🧩" FontSize="26" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Aprendizaje Basado en Problemas" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Los estudiantes resuelven un problema real o simulado." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
+                                                <RadioButton GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
+                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToBool}, ConverterParameter='Proyectos Comunitarios', Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="🏡" FontSize="26" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Proyectos Comunitarios" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="La comunidad es el punto de partida y de llegada del aprendizaje." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
+                                                <RadioButton GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
+                                                             IsChecked="{Binding Metodologia, Converter={StaticResource EqToBool}, ConverterParameter=Aprendizaje-Servicio, Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <TextBlock Grid.Column="0" Text="🤝" FontSize="26" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Aprendizaje-Servicio" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                            <TextBlock Text="Los estudiantes aprenden mientras sirven a su comunidad." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
                                             </UniformGrid>
                                         </StackPanel>
                                     </Border>
@@ -484,12 +526,56 @@
                                         <StackPanel>
                                             <TextBlock Text="INSTRUMENTO DE EVALUACIÓN" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <StackPanel>
-                                                <RadioButton Content="Rúbrica de Niveles de Desempeño" GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
-                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToVis}, ConverterParameter=Rúbrica, Mode=OneWay}"/>
-                                                <RadioButton Content="Lista de Cotejo" GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
-                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToVis}, ConverterParameter='Lista de Cotejo', Mode=OneWay}"/>
-                                                <RadioButton Content="Guía de Observación Estructurada" GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
-                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToVis}, ConverterParameter='Guía de Observación', Mode=OneWay}"/>
+                                                <RadioButton GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
+                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToBool}, ConverterParameter='Lista de Cotejo', Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#7C3AED" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="☑️" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Lista de Cotejo" FontSize="15" FontWeight="Bold"/>
+                                                            <TextBlock Text="Registra la presencia o ausencia de criterios específicos." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
+
+                                                <RadioButton GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
+                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToBool}, ConverterParameter=Rúbrica, Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#E0E7FF" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="📊" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Rúbrica" FontSize="15" FontWeight="Bold"/>
+                                                            <TextBlock Text="Describe niveles de desempeño para cada criterio." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
+
+                                                <RadioButton GroupName="InstGroup" Style="{StaticResource TarjetaInstrumento}"
+                                                             IsChecked="{Binding Instrumento, Converter={StaticResource EqToBool}, ConverterParameter='Guía de Observación', Mode=TwoWay}">
+                                                    <Grid>
+                                                        <Grid.ColumnDefinitions>
+                                                            <ColumnDefinition Width="Auto"/>
+                                                            <ColumnDefinition Width="*"/>
+                                                        </Grid.ColumnDefinitions>
+                                                        <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#E0F2FE" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                            <TextBlock Text="🔍" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                            <TextBlock Text="Guía de Observación" FontSize="15" FontWeight="Bold"/>
+                                                            <TextBlock Text="Guía estructurada para observar actitudes y habilidades." FontSize="12" Opacity="0.85" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </RadioButton>
                                             </StackPanel>
                                         </StackPanel>
                                     </Border>
@@ -533,9 +619,38 @@
                                     <!-- Materiales -->
                                     <Border Style="{StaticResource TarjetaFigma}">
                                         <StackPanel>
-                                            <TextBlock Text="MATERIALES DIDÁCTICOS ADICIONALES" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
-                                            <CheckBox Content="Incluir Ficha de Contenido Resumen" IsChecked="{Binding GenerarFicha}" Style="{StaticResource TarjetaMaterial}"/>
-                                            <CheckBox Content="Formato Listo para Exportación en Word (.docx)" IsChecked="{Binding GenerarEditable}" Style="{StaticResource TarjetaMaterial}"/>
+                                            <TextBlock Text="MATERIALES A GENERAR" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                                            <CheckBox IsChecked="{Binding GenerarFicha}" Style="{StaticResource TarjetaMaterial}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#EDE9FE" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="📄" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="Ficha de Contenido" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                        <TextBlock Text="Resumen con los conceptos clave del tema." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </CheckBox>
+
+                                            <CheckBox IsChecked="{Binding GenerarEditable}" Style="{StaticResource TarjetaMaterial}">
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <Border Grid.Column="0" Width="38" Height="38" CornerRadius="8" Background="#FEF3C7" Margin="0,0,14,0" VerticalAlignment="Center">
+                                                        <TextBlock Text="📝" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                                        <TextBlock Text="Formato Editable" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                        <TextBlock Text="Documento en formato Word/PDF editable para personalizar." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                    </StackPanel>
+                                                </Grid>
+                                            </CheckBox>
                                         </StackPanel>
                                     </Border>
 
