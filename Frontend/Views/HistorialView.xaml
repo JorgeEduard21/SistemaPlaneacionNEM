@@ -19,24 +19,36 @@
         </StackPanel>
 
         <!-- Lista vacía -->
-        <Border Grid.Row="1" Style="{StaticResource TarjetaFigma}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="500"
-                Visibility="{Binding Historial.Count, Converter={StaticResource EqToVis}, ConverterParameter=0}">
-            <StackPanel HorizontalAlignment="Center" Margin="20">
-                <TextBlock Text="📋" FontSize="48" HorizontalAlignment="Center" Margin="0,0,0,15"/>
-                <TextBlock Text="Aún no tienes planeaciones guardadas" FontSize="18" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
+        <Border Grid.Row="1" Style="{StaticResource TarjetaFigma}" VerticalAlignment="Center" HorizontalAlignment="Center" Width="520"
+                Visibility="{Binding TienePlaneacionesEnHistorial, Converter={StaticResource InverseBoolToVis}}"
+                Padding="36,40">
+            <StackPanel HorizontalAlignment="Center">
+                <!-- Icono Portapapeles Figma -->
+                <Viewbox Width="54" Height="54" HorizontalAlignment="Center" Margin="0,0,0,18">
+                    <Canvas Width="48" Height="48">
+                        <Rectangle Canvas.Left="8" Canvas.Top="8" Width="32" Height="36" RadiusX="4" RadiusY="4"
+                                   Stroke="#334155" StrokeThickness="2" Fill="#FFFFFF"/>
+                        <Rectangle Canvas.Left="17" Canvas.Top="4" Width="14" Height="8" RadiusX="2" RadiusY="2"
+                                   Stroke="#334155" StrokeThickness="2" Fill="#F1F5F9"/>
+                        <Line X1="14" Y1="18" X2="34" Y2="18" Stroke="#64748B" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        <Line X1="14" Y1="25" X2="34" Y2="25" Stroke="#64748B" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                        <Line X1="14" Y1="32" X2="26" Y2="32" Stroke="#64748B" StrokeThickness="2" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    </Canvas>
+                </Viewbox>
+                <TextBlock Text="Aún no tienes planeaciones guardadas" FontSize="19" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,8"/>
                 <TextBlock Text="Crea tu primera planeación didáctica usando el Asistente NEM. Se guardará aquí automáticamente."
-                           FontSize="14" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,20"/>
-                <Button Content="Ir al Asistente de Planeación" Command="{Binding IrAVistaWizardCommand}" Style="{StaticResource BotonNaranja}" HorizontalAlignment="Center" Padding="25,12"/>
+                           FontSize="14" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" TextAlignment="Center" Margin="0,0,0,24" LineHeight="20"/>
+                <Button Content="Ir al Asistente de Planeación" Command="{Binding IrAVistaWizardCommand}" Style="{StaticResource BotonNaranja}" HorizontalAlignment="Center" Padding="26,12" FontSize="14" FontWeight="SemiBold"/>
             </StackPanel>
         </Border>
 
         <!-- Listado de Planeaciones -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
-                      Visibility="{Binding Historial.Count, Converter={StaticResource InverseNullOrEmptyToVis}}">
+                      Visibility="{Binding TienePlaneacionesEnHistorial, Converter={StaticResource BoolToVis}}">
             <ItemsControl ItemsSource="{Binding Historial}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Style="{StaticResource TarjetaFigma}" Margin="0,0,0,15">
+                        <Border Style="{StaticResource TarjetaFigma}" Margin="0,0,0,16" Padding="22,18">
                             <Grid>
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*"/>
@@ -44,18 +56,18 @@
                                 </Grid.ColumnDefinitions>
 
                                 <!-- Información de la Planeación -->
-                                <StackPanel Grid.Column="0">
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                        <Border Background="#FFF2EB" CornerRadius="4" Padding="8,4" Margin="0,0,10,0">
+                                <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+                                        <Border Background="#FFF2EB" CornerRadius="6" Padding="10,4" Margin="0,0,10,0">
                                             <TextBlock Text="{Binding Metodologia}" FontSize="12" FontWeight="Bold" Foreground="{StaticResource ColorPrimario}"/>
                                         </Border>
-                                        <Border Background="#F1F5F9" CornerRadius="4" Padding="8,4" Margin="0,0,10,0">
+                                        <Border Background="#F1F5F9" CornerRadius="6" Padding="10,4" Margin="0,0,10,0">
                                             <TextBlock Text="{Binding CampoFormativo}" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
                                         </Border>
                                         <TextBlock Text="{Binding FechaLegible}" FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" VerticalAlignment="Center"/>
                                     </StackPanel>
 
-                                    <TextBlock Text="{Binding Titulo}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8" TextWrapping="Wrap"/>
+                                    <TextBlock Text="{Binding Titulo}" FontSize="18" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,6" TextWrapping="Wrap"/>
                                     
                                     <TextBlock Text="{Binding GradosTexto, StringFormat='Grados: {0}'}" FontSize="13" Foreground="{StaticResource ColorTextoSecundario}"/>
                                 </StackPanel>
@@ -65,11 +77,11 @@
                                     <Button Content="Ver Planeación 👁️" 
                                             Command="{Binding DataContext.CargarDetalleHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource BotonNaranja}" Padding="15,10" Margin="0,0,10,0"/>
+                                            Style="{StaticResource BotonNaranja}" Padding="16,10" Margin="0,0,10,0"/>
                                     <Button Content="Eliminar 🗑️" 
                                             Command="{Binding DataContext.EliminarDeHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource BotonGris}" Padding="12,10"/>
+                                            Style="{StaticResource BotonGris}" Padding="14,10"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

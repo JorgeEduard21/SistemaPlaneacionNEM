@@ -1,24 +1,15 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Windows;
 
-namespace ViewModels
+namespace Frontend
 {
-    public class MainViewModel : INotifyPropertyChanged
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
-        private string _textoResultadoMarkdown;
-        public string TextoResultadoMarkdown
+        public MainWindow()
         {
-            get => _textoResultadoMarkdown;
-            set
-            {
-                if (_textoResultadoMarkdown == value) return;
-                _textoResultadoMarkdown = value;
-                OnPropertyChanged();
-            }
+            InitializeComponent();
         }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-        protected void OnPropertyChanged([CallerMemberName] string name = null) =>
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
     }
 }

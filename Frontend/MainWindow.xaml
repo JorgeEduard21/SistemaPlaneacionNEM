@@ -29,7 +29,7 @@
         <!-- ================================================================= -->
         <!-- ENCABEZADO SUPERIOR Y NAVEGACIÓN ENTRE VISTAS                     -->
         <!-- ================================================================= -->
-        <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource ColorBorde}" BorderThickness="0,0,0,1" Padding="30,15">
+        <Border Grid.Row="0" Background="White" BorderBrush="{StaticResource ColorBorde}" BorderThickness="0,0,0,1" Padding="20,12">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
@@ -38,18 +38,18 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Logo / Título de la Aplicación -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <TextBlock Text="🇲🇽" FontSize="26" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,10,0">
+                    <TextBlock Text="🇲🇽" FontSize="26" VerticalAlignment="Center" Margin="0,0,10,0"/>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Planeación Didáctica NEM" FontSize="18" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia"/>
-                        <TextBlock Text="Plan de Estudios 2022 · Educación Primaria" FontSize="12" Foreground="{StaticResource ColorTextoSecundario}"/>
+                        <TextBlock Text="Planeación Didáctica NEM" FontSize="17" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia"/>
+                        <TextBlock Text="Plan de Estudios 2022 · Educación Primaria" FontSize="11" Foreground="{StaticResource ColorTextoSecundario}"/>
                     </StackPanel>
                 </StackPanel>
 
                 <!-- Pestañas de Navegación Superior -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <Button Content="📝 Asistente de Planeación" Command="{Binding IrAVistaWizardCommand}"
-                            Background="Transparent" BorderThickness="0" Margin="0,0,10,0" Padding="15,8" Cursor="Hand" FontSize="14">
+                            Background="Transparent" BorderThickness="0" Margin="0,0,6,0" Padding="12,7" Cursor="Hand" FontSize="14">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Foreground" Value="{StaticResource ColorTextoSecundario}"/>
@@ -65,7 +65,7 @@
                     </Button>
 
                     <Button Content="⚙️ Configuración (Contexto y API)" Command="{Binding IrAVistaConfiguracionCommand}"
-                            Background="Transparent" BorderThickness="0" Margin="0,0,10,0" Padding="15,8" Cursor="Hand" FontSize="14">
+                            Background="Transparent" BorderThickness="0" Margin="0,0,6,0" Padding="12,7" Cursor="Hand" FontSize="14">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Foreground" Value="{StaticResource ColorTextoSecundario}"/>
@@ -81,7 +81,7 @@
                     </Button>
 
                     <Button Content="📂 Mis Planeaciones" Command="{Binding IrAVistaHistorialCommand}"
-                            Background="Transparent" BorderThickness="0" Padding="15,8" Cursor="Hand" FontSize="14">
+                            Background="Transparent" BorderThickness="0" Padding="12,7" Cursor="Hand" FontSize="14">
                         <Button.Style>
                             <Style TargetType="Button">
                                 <Setter Property="Foreground" Value="{StaticResource ColorTextoSecundario}"/>
@@ -761,7 +761,8 @@
                                         <StackPanel>
                                             <TextBlock Text="TEMA DE INTERÉS O PROYECTO" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <TextBlock Text="¿Cuál es el problema o tema detonador?" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
-                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="75" TextWrapping="Wrap" Text="{Binding TemaInteres, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. El cuidado del agua en nuestra colonia, Leyendas tradicionales de la comunidad..." Margin="0"/>
+                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="70" TextWrapping="Wrap" Text="{Binding TemaInteres, UpdateSourceTrigger=PropertyChanged}" 
+                                                     Tag="Ej. El cuidado del agua en nuestra colonia, Leyendas tradicionales de la comunidad..." Margin="0"/>
                                         </StackPanel>
                                     </Border>
 

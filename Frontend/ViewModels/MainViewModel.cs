@@ -232,8 +232,8 @@ namespace Frontend.ViewModels
             {
                 if (SetProperty(ref _planeacionActual, value))
                 {
+                    TextoResultadoMarkdown = value?.Contenido ?? string.Empty;
                     OnPropertyChanged(nameof(TienePlaneacionGenerada));
-                    OnPropertyChanged(nameof(TextoResultadoMarkdown));
                 }
             }
         }
@@ -252,6 +252,8 @@ namespace Frontend.ViewModels
 
         // --- Historial ---
         public ObservableCollection<ResumenPlaneacion> Historial { get; } = new();
+
+        public bool TienePlaneacionesEnHistorial => Historial.Count > 0;
 
         private ResumenPlaneacion? _planeacionSeleccionadaHistorial;
         public ResumenPlaneacion? PlaneacionSeleccionadaHistorial
@@ -292,6 +294,9 @@ namespace Frontend.ViewModels
             PdaLista = new ListaEditable();
             CriteriosLista = new ListaEditable();
 
+            // Notificar cambios en la existencia de elementos del historial
+            Historial.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TienePlaneacionesEnHistorial));
+
             // Configurar manejador global de errores en AsyncRelayCommand
             AsyncRelayCommand.ManejadorErroresGlobal = ex =>
             {
@@ -310,7 +315,7 @@ namespace Frontend.ViewModels
             // Comandos de Navegación de Vistas
             IrAVistaWizardCommand = new RelayCommand(_ => VistaActual = 0);
             IrAVistaConfiguracionCommand = new RelayCommand(_ => { VistaActual = 1; _ = ConfiguracionVM.CargarAsync(); });
-            IrAVistaHistorialCommand = new RelayCommand(_ => VistaActual = 2);
+            IrAVistaHistorialCommand = new RelayCommand(_ => { VistaActual = 2; _ = CargarHistorialAsync(); });
 
             // Generación de planeación con IA
             GenerarPlaneacionCommand = new AsyncRelayCommand(_ => GenerarPlaneacionAsync(), _ => !GenerandoPlaneacion);
@@ -333,6 +338,7 @@ namespace Frontend.ViewModels
                 await _backendManager.IniciarAsync();
                 BackendConectado = true;
                 await ConfiguracionVM.CargarAsync();
+                await CargarHistorialAsync();
                 Notificar("Backend conectado correctamente.");
             }
             catch (Exception ex)
@@ -429,6 +435,7 @@ namespace Frontend.ViewModels
                 using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(4));
                 var resultado = await _api.GenerarPlaneacionAsync(solicitud, cts.Token);
                 PlaneacionActual = resultado;
+                _ = CargarHistorialAsync();
                 PasoActual = 3; // Mostrar pantalla de resumen/resultado
                 Notificar("¡Planeación didáctica generada exitosamente!");
             }
@@ -480,6 +487,7 @@ namespace Frontend.ViewModels
                 {
                     Historial.Add(item);
                 }
+                OnPropertyChanged(nameof(TienePlaneacionesEnHistorial));
             }
             catch (Exception ex)
             {
@@ -516,6 +524,7 @@ namespace Frontend.ViewModels
             {
                 await _api.EliminarPlaneacionAsync(resumen.Id);
                 Historial.Remove(resumen);
+                OnPropertyChanged(nameof(TienePlaneacionesEnHistorial));
                 if (PlaneacionActual?.Id == resumen.Id)
                 {
                     PlaneacionActual = null;
