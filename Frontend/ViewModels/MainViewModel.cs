@@ -263,6 +263,7 @@ namespace Frontend.ViewModels
         // --- Comandos ---
         public ICommand ContinuarCommand { get; }
         public ICommand AtrasCommand { get; }
+        public ICommand IrAPasoCommand { get; }
         public ICommand IrAVistaWizardCommand { get; }
         public ICommand IrAVistaConfiguracionCommand { get; }
         public ICommand IrAVistaHistorialCommand { get; }
@@ -300,6 +301,11 @@ namespace Frontend.ViewModels
             // Comandos de Wizard
             ContinuarCommand = new RelayCommand(_ => AvanzarPaso(), _ => PasoActual < 3);
             AtrasCommand = new RelayCommand(_ => RetrocederPaso(), _ => PasoActual > 0);
+            IrAPasoCommand = new RelayCommand(p =>
+            {
+                if (int.TryParse(p?.ToString(), out var paso) && paso >= 0 && paso <= 3)
+                    PasoActual = paso;
+            });
 
             // Comandos de Navegación de Vistas
             IrAVistaWizardCommand = new RelayCommand(_ => VistaActual = 0);

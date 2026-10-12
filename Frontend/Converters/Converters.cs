@@ -37,6 +37,29 @@ namespace Frontend.Converters
     }
 
     /// <summary>
+    /// Stepper del asistente. values[0] = PasoActual (base 0), values[1] = número
+    /// del círculo (base 1, normalmente en Tag). Devuelve "Completado", "Actual" o "Pendiente".
+    /// </summary>
+    public class PasoEstadoConverter : IMultiValueConverter
+    {
+        public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (values.Length < 2 ||
+                !int.TryParse(values[0]?.ToString(), out var actual) ||
+                !int.TryParse(values[1]?.ToString(), out var numero))
+                return "Pendiente";
+
+            var indice = numero - 1;
+            if (indice < actual) return "Completado";
+            if (indice == actual) return "Actual";
+            return "Pendiente";
+        }
+
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
+            => throw new NotSupportedException();
+    }
+
+    /// <summary>
     /// Devuelve true cuando value == parameter. Al marcarse (ConvertBack con true)
     /// regresa el parámetro convertido al tipo destino; ideal para RadioButtons
     /// enlazados TwoWay a un índice entero.

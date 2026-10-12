@@ -12,6 +12,8 @@
         <conv:NullOrEmptyToVisibilityConverter x:Key="NullOrEmptyToVis"/>
         <conv:NullOrEmptyToVisibilityConverter x:Key="InverseNullOrEmptyToVis" Invertir="True"/>
         <conv:EqualityToBoolConverter x:Key="EqToBool"/>
+        <conv:PasoEstadoConverter x:Key="PasoEstado"/>
+        <SolidColorBrush x:Key="ColorExito" Color="#4E7D6E"/>
 
         <!-- Fuente con respaldo de emojis: así los iconos (📝 ⚙️ 📂 👥 🔑 ...) siempre se dibujan -->
         <FontFamily x:Key="FuenteApp">Segoe UI, Segoe UI Emoji, Segoe UI Symbol</FontFamily>
@@ -251,6 +253,36 @@
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
                                 <Setter Property="Background" Value="#CBD5E1"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Estilo Botón del Stepper (Asistente) -->
+        <Style x:Key="BotonPasoStepper" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="4"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="Contenedor" Background="Transparent" SnapsToDevicePixels="True" RenderTransformOrigin="0.5,0.5">
+                            <Border.RenderTransform>
+                                <ScaleTransform ScaleX="1.0" ScaleY="1.0"/>
+                            </Border.RenderTransform>
+                            <ContentPresenter HorizontalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Contenedor" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="1.06" ScaleY="1.06"/>
+                                    </Setter.Value>
+                                </Setter>
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>
