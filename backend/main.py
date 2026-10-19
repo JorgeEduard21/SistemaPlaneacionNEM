@@ -6,21 +6,23 @@ Documentación interactiva: http://127.0.0.1:8765/docs
 import os
 import re
 import warnings
-from typing import List
+from typing import List, Optional
 from urllib.parse import quote
 
 warnings.filterwarnings("ignore", category=FutureWarning)  # aviso de EOL de Python 3.9 en google-auth
 
 import uvicorn
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, Response
 
 import almacenamiento as db
+import catalogo
 import exportar_docx
 import servicio_ia as ia
 from models import (
-    ActualizarPlaneacion, CambiarModelo, EstadoConfiguracion, GuardarApiKey,
-    PerfilGrupo, Planeacion, ProbarApiKey, ResultadoPrueba, ResumenPlaneacion,
+    ActualizarPlaneacion, CambiarModelo, ContenidoCatalogo, EstadoConfiguracion,
+    GuardarApiKey, NuevoContenidoCatalogo, NuevoPdaCatalogo, PerfilGrupo,
+    Planeacion, ProbarApiKey, ResultadoPrueba, ResumenPlaneacion,
     SolicitudPlaneacion,
 )
 
@@ -116,6 +118,55 @@ def obtener_perfil():
 @app.put("/api/perfil", response_model=PerfilGrupo)
 def guardar_perfil(perfil: PerfilGrupo):
     return db.guardar_perfil(perfil)
+
+
+# ---------------------------------------------------------------------------
+# Catálogo NEM (contenidos y PDA precargados + personalizados)
+# ---------------------------------------------------------------------------
+@app.get("/api/catalogo", response_model=List[ContenidoCatalogo])
+def obtener_catalogo(
+    campo: Optional[str] = Query(default=None),
+    grados: Optional[str] = Query(default=None, description="Grados separados por coma, o vacío para usar el perfil"),
+):
+    if grados is not None:
+        lista_grados = [g.strip() for g in grados.split(",") if g.strip()]
+    else:
+        perfil = db.obtener_perfil()
+        lista_grados = perfil.grados if perfil else []
+    return catalogo.listar(campo, lista_grados)
+
+
+@app.post("/api/catalogo/contenidos", response_model=ContenidoCatalogo)
+def agregar_contenido_catalogo(datos: NuevoContenidoCatalogo):
+    grados = datos.grados
+    if not grados:
+        perfil = db.obtener_perfil()
+        grados = perfil.grados if perfil and perfil.grados else ["1° Primaria"]
+    try:
+        return catalogo.agregar_contenido(datos.campo, datos.titulo, grados, datos.pda)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.post("/api/catalogo/pda", status_code=204)
+def agregar_pda_catalogo(datos: NuevoPdaCatalogo):
+    try:
+        catalogo.agregar_pda(datos.contenido_id, datos.grado, datos.texto)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except KeyError:
+        raise HTTPException(status_code=404, detail="Contenido no encontrado en el catálogo.")
+    return Response(status_code=204)
+
+
+@app.delete("/api/catalogo/contenidos/{contenido_id}", status_code=204)
+def eliminar_contenido_catalogo(contenido_id: str):
+    try:
+        catalogo.eliminar_contenido(contenido_id)
+    except KeyError:
+        raise HTTPException(status_code=404, detail="El contenido personalizado no existe.")
+    return Response(status_code=204)
+
 
 
 # ---------------------------------------------------------------------------

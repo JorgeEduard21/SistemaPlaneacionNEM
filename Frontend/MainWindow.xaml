@@ -685,47 +685,210 @@
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- Contenido Curricular -->
+                                    <!-- Contenido Curricular y Catálogo Precargado NEM -->
                                     <Border Style="{StaticResource TarjetaFigma}">
                                         <StackPanel>
-                                            <TextBlock Text="CONTENIDO CURRICULAR" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
-                                            <TextBlock Text="Contenido del Programa Sintético" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
-                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="75" TextWrapping="Wrap" Text="{Binding Contenido, UpdateSourceTrigger=PropertyChanged}" Tag="Escribe el contenido oficial del programa de estudios 2022..."/>
+                                            <Grid Margin="0,0,0,10">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="CONTENIDOS DEL PROGRAMA SINTÉTICO NEM 2022 (PRECARGADOS)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}"/>
+                                                    <TextBlock Text="{Binding GradosActivosCatalogoTexto}" FontSize="12" Foreground="#4E7D6E" FontWeight="SemiBold" Margin="0,4,0,0"/>
+                                                </StackPanel>
+                                                <Button Grid.Column="1" Content="Cambiar grados ⚙️" Command="{Binding IrAVistaConfiguracionCommand}"
+                                                        Background="#FFF2EB" BorderBrush="#E5D8C5" BorderThickness="1" Foreground="{StaticResource ColorPrimario}"
+                                                        FontWeight="SemiBold" FontSize="12" Padding="12,6" Cursor="Hand" VerticalAlignment="Center"/>
+                                            </Grid>
 
-                                            <TextBlock Text="Subcontenido (opcional)" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
-                                            <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding Subcontenido, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. El ciclo del agua y el cuidado comunitario"/>
+                                            <!-- Buscador rápido del catálogo -->
+                                            <TextBox Style="{StaticResource TextBoxElegante}"
+                                                     Text="{Binding FiltroCatalogo, UpdateSourceTrigger=PropertyChanged}"
+                                                     Tag="🔍 Buscar contenido o palabra clave (ej. fracciones, ecosistema, cuentos, salud)..."
+                                                     Margin="0,5,0,12"/>
 
-                                            <TextBlock Text="Intención Didáctica" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
-                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="75" TextWrapping="Wrap" Text="{Binding Intencion, UpdateSourceTrigger=PropertyChanged}" Tag="¿Qué deseas que los alumnos logren reflexionar, aprender o transformar?"/>
+                                            <!-- Lista interactiva de Contenidos precargados -->
+                                            <TextBlock Text="Haz clic en un contenido oficial para seleccionarlo y cargar sus PDA automáticamente:"
+                                                       FontSize="12.5" Foreground="#64748B" Margin="0,0,0,8"/>
+
+                                            <ListBox ItemsSource="{Binding ContenidosFiltrados}"
+                                                     SelectedItem="{Binding ContenidoCatalogoSeleccionado, Mode=TwoWay}"
+                                                     MaxHeight="230"
+                                                     Background="#FAF7F2"
+                                                     BorderBrush="{StaticResource ColorBorde}"
+                                                     BorderThickness="1"
+                                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                                                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                                                     Padding="6"
+                                                     Margin="0,0,0,18">
+                                                <ListBox.ItemContainerStyle>
+                                                    <Style TargetType="ListBoxItem">
+                                                        <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                                        <Setter Property="Padding" Value="0"/>
+                                                        <Setter Property="Margin" Value="0,0,0,6"/>
+                                                        <Setter Property="Cursor" Value="Hand"/>
+                                                        <Setter Property="Template">
+                                                            <Setter.Value>
+                                                                <ControlTemplate TargetType="ListBoxItem">
+                                                                    <Border x:Name="CardItem" Background="White" BorderBrush="#E5D8C5" BorderThickness="1.2" CornerRadius="10" Padding="14,10">
+                                                                        <Grid>
+                                                                            <Grid.ColumnDefinitions>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                                <ColumnDefinition Width="*"/>
+                                                                                <ColumnDefinition Width="Auto"/>
+                                                                            </Grid.ColumnDefinitions>
+                                                                            <Border Grid.Column="0" Background="#FFF2EB" CornerRadius="6" Padding="8,3" Margin="0,0,12,0" VerticalAlignment="Center">
+                                                                                <TextBlock Text="{Binding FaseTexto}" FontSize="11" FontWeight="Bold" Foreground="{StaticResource ColorPrimario}"/>
+                                                                            </Border>
+                                                                            <TextBlock x:Name="TxtTitulo" Grid.Column="1" Text="{Binding Titulo}" FontSize="13.5" Foreground="#1E293B" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                                            <Border x:Name="BadgeCheck" Grid.Column="2" Background="#F1F5F9" CornerRadius="12" Padding="9,3" Margin="10,0,0,0" VerticalAlignment="Center">
+                                                                                <TextBlock x:Name="TxtBadge" Text="{Binding TotalPda, StringFormat='{}{0} PDA'}" FontSize="11" FontWeight="SemiBold" Foreground="#475569"/>
+                                                                            </Border>
+                                                                        </Grid>
+                                                                    </Border>
+                                                                    <ControlTemplate.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter TargetName="CardItem" Property="BorderBrush" Value="#D4A373"/>
+                                                                            <Setter TargetName="CardItem" Property="Background" Value="#FFFDF9"/>
+                                                                        </Trigger>
+                                                                        <Trigger Property="IsSelected" Value="True">
+                                                                            <Setter TargetName="CardItem" Property="Background" Value="#FFF2EB"/>
+                                                                            <Setter TargetName="CardItem" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                                                            <Setter TargetName="CardItem" Property="BorderThickness" Value="2"/>
+                                                                            <Setter TargetName="TxtTitulo" Property="FontWeight" Value="Bold"/>
+                                                                            <Setter TargetName="BadgeCheck" Property="Background" Value="{StaticResource ColorPrimario}"/>
+                                                                            <Setter TargetName="TxtBadge" Property="Foreground" Value="White"/>
+                                                                            <Setter TargetName="TxtBadge" Property="Text" Value="✓ Seleccionado"/>
+                                                                        </Trigger>
+                                                                    </ControlTemplate.Triggers>
+                                                                </ControlTemplate>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </Style>
+                                                </ListBox.ItemContainerStyle>
+                                            </ListBox>
+
+                                            <!-- Contenido seleccionado o personalizado -->
+                                            <Grid Margin="0,0,0,5">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="Contenido Seleccionado (puedes ajustarlo o redactar uno propio)" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" VerticalAlignment="Center"/>
+                                                <Button Grid.Column="1" Content="💾 Guardar en mi catálogo" Command="{Binding GuardarContenidoPersonalizadoCommand}"
+                                                        ToolTip="Guarda este contenido y sus PDA en tu catálogo personal para futuras planeaciones"
+                                                        Background="Transparent" BorderThickness="0" Foreground="#4E7D6E" FontWeight="Bold" FontSize="12" Cursor="Hand"/>
+                                            </Grid>
+                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="68" TextWrapping="Wrap" Text="{Binding Contenido, UpdateSourceTrigger=PropertyChanged}" Tag="Selecciona un contenido de la lista de arriba o escribe uno personalizado..."/>
+
+                                            <TextBlock Text="Subcontenido o especificidad local (opcional)" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                            <TextBox Style="{StaticResource TextBoxElegante}" Text="{Binding Subcontenido, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. El ciclo del agua y el cuidado comunitario en nuestra localidad"/>
+
+                                            <TextBlock Text="Intención Didáctica (opcional)" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,5"/>
+                                            <TextBox Style="{StaticResource TextBoxElegante}" Height="68" TextWrapping="Wrap" Text="{Binding Intencion, UpdateSourceTrigger=PropertyChanged}" Tag="¿Qué deseas que los alumnos logren reflexionar, aprender o transformar?" Margin="0,5,0,5"/>
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- PDA -->
+                                    <!-- PDA (Procesos de Desarrollo de Aprendizaje) -->
                                     <Border Style="{StaticResource TarjetaFigma}">
                                         <StackPanel>
-                                            <TextBlock Text="PROCESOS DE DESARROLLO DEL APRENDIZAJE (PDA)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
-                                            <Grid Margin="0,0,0,10">
+                                            <Grid Margin="0,0,0,12">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Grid.Column="0">
+                                                    <TextBlock Text="PROCESOS DE DESARROLLO DE APRENDIZAJE (PDA)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}"/>
+                                                    <TextBlock Text="Marca o desmarca los PDA sugeridos del contenido elegido, o agrega PDA propios." FontSize="12.5" Foreground="#64748B" Margin="0,3,0,0"/>
+                                                </StackPanel>
+                                                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <Button Content="Seleccionar todos" Command="{Binding SeleccionarTodosPdaCommand}"
+                                                            Visibility="{Binding TienePdaSugeridosCatalogo, Converter={StaticResource BoolToVis}}"
+                                                            Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" Foreground="#15803D"
+                                                            FontSize="12" FontWeight="SemiBold" Padding="10,5" Margin="0,0,8,0" Cursor="Hand"/>
+                                                    <Button Content="Limpiar lista" Command="{Binding LimpiarPdaCommand}"
+                                                            Background="#FEF2F2" BorderBrush="#FECACA" BorderThickness="1" Foreground="#DC2626"
+                                                            FontSize="12" FontWeight="SemiBold" Padding="10,5" Cursor="Hand"/>
+                                                </StackPanel>
+                                            </Grid>
+
+                                            <!-- Tarjetas de PDA precargados del contenido elegido -->
+                                            <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1" CornerRadius="10" Padding="12" Margin="0,0,0,16"
+                                                    Visibility="{Binding TienePdaSugeridosCatalogo, Converter={StaticResource BoolToVis}}">
+                                                <StackPanel>
+                                                    <TextBlock Text="✨ PDA oficiales del contenido seleccionado (haz clic para activar o desactivar):"
+                                                               FontSize="12.5" FontWeight="Bold" Foreground="#4E7D6E" Margin="0,0,0,10"/>
+                                                    <ItemsControl ItemsSource="{Binding PdaSugeridosCatalogo}">
+                                                        <ItemsControl.ItemTemplate>
+                                                            <DataTemplate>
+                                                                <CheckBox IsChecked="{Binding Seleccionado, Mode=TwoWay}" Cursor="Hand" Margin="0,0,0,8">
+                                                                    <CheckBox.Template>
+                                                                        <ControlTemplate TargetType="CheckBox">
+                                                                            <Border x:Name="PdaBox" Background="White" BorderBrush="#E2E8F0" BorderThickness="1.2" CornerRadius="8" Padding="12,9">
+                                                                                <Grid>
+                                                                                    <Grid.ColumnDefinitions>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="Auto"/>
+                                                                                        <ColumnDefinition Width="*"/>
+                                                                                    </Grid.ColumnDefinitions>
+                                                                                    <Border x:Name="CheckIcon" Grid.Column="0" Width="20" Height="20" CornerRadius="5" BorderBrush="#CBD5E1" BorderThickness="1.5" Background="White" VerticalAlignment="Center" Margin="0,0,10,0">
+                                                                                        <TextBlock x:Name="CheckMark" Text="✓" FontSize="12" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" Visibility="Collapsed"/>
+                                                                                    </Border>
+                                                                                    <Border Grid.Column="1" Background="#F1F5F9" CornerRadius="5" Padding="7,2" Margin="0,0,10,0" VerticalAlignment="Center">
+                                                                                        <TextBlock Text="{Binding Grado}" FontSize="11" FontWeight="Bold" Foreground="#475569"/>
+                                                                                    </Border>
+                                                                                    <TextBlock Grid.Column="2" Text="{Binding Texto}" FontSize="13" Foreground="#1E293B" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                                                                </Grid>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsMouseOver" Value="True">
+                                                                                    <Setter TargetName="PdaBox" Property="BorderBrush" Value="#D4A373"/>
+                                                                                </Trigger>
+                                                                                <Trigger Property="IsChecked" Value="True">
+                                                                                    <Setter TargetName="PdaBox" Property="Background" Value="#FFF5EE"/>
+                                                                                    <Setter TargetName="PdaBox" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                                                                    <Setter TargetName="CheckIcon" Property="Background" Value="{StaticResource ColorPrimario}"/>
+                                                                                    <Setter TargetName="CheckIcon" Property="BorderBrush" Value="{StaticResource ColorPrimario}"/>
+                                                                                    <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                                                                </Trigger>
+                                                                            </ControlTemplate.Triggers>
+                                                                        </ControlTemplate>
+                                                                    </CheckBox.Template>
+                                                                </CheckBox>
+                                                            </DataTemplate>
+                                                        </ItemsControl.ItemTemplate>
+                                                    </ItemsControl>
+                                                </StackPanel>
+                                            </Border>
+
+                                            <!-- Captura manual para agregar un PDA adicional -->
+                                            <TextBlock Text="Agregar un PDA adicional o personalizado:" FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,6"/>
+                                            <Grid Margin="0,0,0,12">
                                                 <Grid.ColumnDefinitions>
                                                     <ColumnDefinition Width="*"/>
                                                     <ColumnDefinition Width="15"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding PdaLista.Nuevo, UpdateSourceTrigger=PropertyChanged}" Tag="Escribe un PDA y haz clic en Agregar" Margin="0"/>
-                                                <Button Grid.Column="2" Content="Agregar PDA" Command="{Binding PdaLista.AgregarCommand}" Style="{StaticResource BotonNaranja}" Height="45" Padding="20,0"/>
+                                                <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding PdaLista.Nuevo, UpdateSourceTrigger=PropertyChanged}" Tag="Escribe un PDA personalizado y haz clic en Agregar..." Margin="0"/>
+                                                <Button Grid.Column="2" Content="+ Agregar PDA" Command="{Binding PdaLista.AgregarCommand}" Style="{StaticResource BotonNaranja}" Height="45" Padding="20,0"/>
                                             </Grid>
 
-                                            <!-- Lista de PDAs -->
+                                            <!-- Lista de PDAs seleccionados que se enviarán a la planeación -->
+                                            <TextBlock Text="PDA incluidos en esta planeación:" FontWeight="Bold" FontSize="13" Foreground="#475569" Margin="0,0,0,8"/>
                                             <ItemsControl ItemsSource="{Binding PdaLista.Elementos}">
                                                 <ItemsControl.ItemTemplate>
                                                     <DataTemplate>
                                                         <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="12,8" Margin="0,0,0,6">
                                                             <Grid>
                                                                 <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
                                                                     <ColumnDefinition Width="*"/>
                                                                     <ColumnDefinition Width="Auto"/>
                                                                 </Grid.ColumnDefinitions>
-                                                                <TextBlock Grid.Column="0" Text="{Binding}" VerticalAlignment="Center" FontSize="13" Foreground="#334155" TextWrapping="Wrap"/>
-                                                                <Button Grid.Column="1" Content="✕" 
+                                                                <TextBlock Grid.Column="0" Text="•" FontWeight="Bold" Foreground="{StaticResource ColorPrimario}" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                                                                <TextBlock Grid.Column="1" Text="{Binding}" VerticalAlignment="Center" FontSize="13" Foreground="#334155" TextWrapping="Wrap"/>
+                                                                <Button Grid.Column="2" Content="✕" 
                                                                         Command="{Binding DataContext.PdaLista.QuitarCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                                                         CommandParameter="{Binding}"
                                                                         Background="Transparent" BorderThickness="0" Foreground="#EF4444" FontWeight="Bold" Cursor="Hand" Padding="8,2"/>
@@ -769,7 +932,7 @@
                                     <!-- Metodología Didáctica -->
                                     <Border Style="{StaticResource TarjetaFigma}">
                                         <StackPanel>
-                                            <TextBlock Text="METODOLOGÍA DIDÁCTICA SOCiOCRÍTICA" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                                            <TextBlock Text="METODOLOGÍA DIDÁCTICA SOCIOCRÍTICA" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <UniformGrid Columns="2" Rows="2">
                                                 <RadioButton GroupName="MetodologiaGroup" Style="{StaticResource TarjetaMetodologia}"
                                                              IsChecked="{Binding Metodologia, Converter={StaticResource EqToBool}, ConverterParameter=STEAM, Mode=TwoWay}">
@@ -933,7 +1096,7 @@
                                     </Border>
 
                                     <!-- Criterios -->
-                                    <Border Style="{StaticResource TarjetaFiga}">
+                                    <Border Style="{StaticResource TarjetaFigma}">
                                         <StackPanel>
                                             <TextBlock Text="CRITERIOS ESPECÍFICOS DE EVALUACIÓN (OPCIONAL)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
                                             <Grid Margin="0,0,0,10">
@@ -942,7 +1105,7 @@
                                                     <ColumnDefinition Width="15"/>
                                                     <ColumnDefinition Width="Auto"/>
                                                 </Grid.ColumnDefinitions>
-                                                <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding CriteriosLista.Nuevo, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Participa activamente y colabora con sus pares... Enter" Margin="0"/>
+                                                <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding CriteriosLista.Nuevo, UpdateSourceTrigger=PropertyChanged}" Tag="Ej. Participa activamente y colabora con sus pares..." Margin="0"/>
                                                 <Button Grid.Column="2" Content="Agregar Criterio" Command="{Binding CriteriosLista.AgregarCommand}" Style="{StaticResource BotonNaranja}" Height="45" Padding="20,0"/>
                                             </Grid>
 
@@ -998,8 +1161,8 @@
                                                         <TextBlock Text="📝" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                                     </Border>
                                                     <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                                        <TextBlock Text="Formato Editable" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
-                                                        <TextBlock Text="Documento en formato Word/PDF editable para personalizar." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
+                                                        <TextBlock Text="Formato Editable (Word / Google Docs)" FontSize="15" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}"/>
+                                                        <TextBlock Text="Documento estructurado listo para abrir en Google Docs o descargar en Word (.docx)." FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" TextWrapping="Wrap" Margin="0,3,0,0"/>
                                                     </StackPanel>
                                                 </Grid>
                                             </CheckBox>
@@ -1023,51 +1186,77 @@
                         <Grid>
                             <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,20,0">
                                 <StackPanel MaxWidth="920">
-                                    <TextBlock Text="🚀 Generación y Resultado de la Planeación" FontSize="30" FontWeight="Bold" Foreground="#1E1E1E" Margin="0,0,0,8" FontFamily="Georgia"/>
-                                    <TextBlock Text="Revisa la configuración y genera tu planeación didáctica personalizada con Gemini." FontSize="15" Foreground="#5C5C5C" Margin="0,0,0,25"/>
+                                    <TextBlock Text="🚀 Generación y Exportación (Word y Google Docs)" FontSize="30" FontWeight="Bold" Foreground="#1E1E1E" Margin="0,0,0,8" FontFamily="Georgia"/>
+                                    <TextBlock Text="Revisa el resumen de tu planeación, genérala con Gemini y ábrela en Google Docs o Word." FontSize="15" Foreground="#5C5C5C" Margin="0,0,0,25"/>
 
-                                    <!-- Banner Resumen de Configuración del Aula que se usará -->
-                                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="10" Padding="20" Margin="0,0,0,20">
+                                    <!-- Banner Resumen de Configuración del Aula y Selección Curricular -->
+                                    <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1.2" CornerRadius="12" Padding="20" Margin="0,0,0,20">
                                         <Grid>
                                             <Grid.ColumnDefinitions>
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="Auto"/>
                                             </Grid.ColumnDefinitions>
                                             <StackPanel Grid.Column="0">
-                                                <TextBlock Text="Contexto del Aula Guardado en Configuración:" FontWeight="Bold" FontSize="13" Foreground="#475569" Margin="0,0,0,4"/>
-                                                <TextBlock Text="{Binding ConfiguracionVM.PerfilGuardado.Grados, StringFormat='Grados: {0}'}" FontSize="13" Foreground="#334155"/>
-                                                <TextBlock Text="{Binding ConfiguracionVM.PerfilGuardado.CantidadAlumnos, StringFormat='Alumnos: {0}'}" FontSize="13" Foreground="#334155"/>
-                                                <TextBlock Text="{Binding ConfiguracionVM.PerfilGuardado.Entorno, StringFormat='Entorno: {0}'}" FontSize="13" Foreground="#334155"/>
+                                                <TextBlock Text="📌 Resumen del Contexto y Selección Curricular:" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorPrimario}" Margin="0,0,0,8"/>
+                                                <TextBlock Text="{Binding GradosPerfilResumenTexto, StringFormat='• Grados del grupo: {0}'}" FontSize="13" Foreground="#334155" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding ConfiguracionVM.PerfilGuardado.CantidadAlumnos, StringFormat='• Alumnos: {0}'}" FontSize="13" Foreground="#334155" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding ConfiguracionVM.PerfilGuardado.Entorno, StringFormat='• Entorno: {0}'}" FontSize="13" Foreground="#334155" Margin="0,0,0,3"/>
+                                                <TextBlock Text="{Binding CampoFormativo, StringFormat='• Campo Formativo: {0}'}" FontSize="13" FontWeight="SemiBold" Foreground="#1E293B" Margin="0,4,0,2"/>
+                                                <TextBlock Text="{Binding Contenido, StringFormat='• Contenido: {0}'}" FontSize="13" Foreground="#334155" TextWrapping="Wrap"/>
                                             </StackPanel>
                                             <Button Grid.Column="1" Content="Modificar Contexto ✏️" Command="{Binding IrAVistaConfiguracionCommand}"
-                                                    Background="Transparent" BorderThickness="0" Foreground="#2563EB" FontWeight="Bold" Cursor="Hand" VerticalAlignment="Center"/>
+                                                    Background="White" BorderBrush="#E5D8C5" BorderThickness="1" Padding="14,8" Foreground="{StaticResource ColorPrimario}" FontWeight="Bold" Cursor="Hand" VerticalAlignment="Center"/>
                                         </Grid>
                                     </Border>
 
                                     <!-- Botón Principal Generar Planeación -->
                                     <Border Style="{StaticResource TarjetaFigma}">
-                                        <StackPanel HorizontalAlignment="Center" Margin="20">
+                                        <StackPanel HorizontalAlignment="Center" Margin="15">
                                             <TextBlock Text="✨ Generar Planeación Didáctica con IA" FontSize="20" FontWeight="Bold" Foreground="{StaticResource ColorTextoPrincipal}" HorizontalAlignment="Center" Margin="0,0,0,10"/>
-                                            <TextBlock Text="Gemini adaptará la secuencia didáctica considerando las fases de la metodología, los PDA y los ajustes para tu grupo."
+                                            <TextBlock Text="Gemini diseñará la secuencia didáctica completa considerando las fases de la metodología, los PDA seleccionados y las adecuaciones para tu grupo."
                                                        FontSize="14" Foreground="{StaticResource ColorTextoSecundario}" TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,20"/>
                                             
                                             <Button Content="¡Generar Planeación con Gemini! 🚀" 
                                                     Command="{Binding GenerarPlaneacionCommand}"
                                                     Style="{StaticResource BotonNaranja}" 
-                                                    Padding="35,16" FontSize="16"/>
+                                                    Padding="35,16" FontSize="16"
+                                                    HorizontalAlignment="Center"/>
                                         </StackPanel>
                                     </Border>
 
-                                    <!-- Resultado Generado -->
-                                    <StackPanel Visibility="{Binding TienePlaneacionGenerada, Converter={StaticResource BoolToVis}}" Margin="0,20,0,30">
-                                        <Grid Margin="0,0,0,15">
-                                            <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*"/>
-                                                <ColumnDefinition Width="Auto"/>
-                                            </Grid.ColumnDefinitions>
-                                            <TextBlock Grid.Column="0" Text="{Binding PlaneacionActual.Titulo}" FontSize="22" FontWeight="Bold" Foreground="#1E1E1E" TextWrapping="Wrap"/>
-                                            <Button Grid.Column="1" Content="Descargar en Word (.docx) 📄" Command="{Binding DescargarWordCommand}" Style="{StaticResource BotonNaranja}" Padding="20,10" VerticalAlignment="Center"/>
-                                        </Grid>
+                                    <!-- Resultado Generado y Opciones de Exportación (Word + Google Docs) -->
+                                    <StackPanel Visibility="{Binding TienePlaneacionGenerada, Converter={StaticResource BoolToVis}}" Margin="0,10,0,30">
+                                        <Border Style="{StaticResource TarjetaFigma}" Background="#FFFDF9" BorderBrush="#D4A373" Padding="22,18" Margin="0,0,0,18">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PlaneacionActual.Titulo}" FontSize="21" FontWeight="Bold" Foreground="#1E1E1E" TextWrapping="Wrap" Margin="0,0,0,6"/>
+                                                <TextBlock Text="Elige cómo deseas trabajar o exportar tu planeación didáctica:" FontSize="13" Foreground="#64748B" Margin="0,0,0,14"/>
+
+                                                <WrapPanel>
+                                                    <Button Content="🌐 Abrir en Google Docs (sin licencia de Office)" 
+                                                            Command="{Binding AbrirEnGoogleDocsCommand}" 
+                                                            Style="{StaticResource BotonGoogleDocs}" 
+                                                            ToolTip="Copia la planeación con formato completo (tablas, colores y títulos) y abre un documento nuevo de Google Docs listo para pegar con Ctrl+V"
+                                                            Padding="20,12" Margin="0,0,12,8"/>
+
+                                                    <Button Content="📄 Descargar en Word (.docx)" 
+                                                            Command="{Binding DescargarWordCommand}" 
+                                                            Style="{StaticResource BotonNaranja}" 
+                                                            ToolTip="Genera y abre el archivo .docx compatible con Microsoft Word, LibreOffice o Google Drive"
+                                                            Padding="20,12" Margin="0,0,12,8"/>
+
+                                                    <Button Content="📋 Copiar con formato" 
+                                                            Command="{Binding CopiarPlaneacionCommand}" 
+                                                            Style="{StaticResource BotonGris}" 
+                                                            ToolTip="Copia la planeación con tablas y formato enriquecido al portapapeles"
+                                                            Padding="18,12" Margin="0,0,0,8"/>
+                                                </WrapPanel>
+
+                                                <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,6,0,0">
+                                                    <TextBlock Text="💡 Tip para Google Docs: Al hacer clic en «Abrir en Google Docs», tu planeación ya va copiada con tablas, colores y encabezados. Cuando se abra la página en tu navegador, solo presiona Ctrl + V."
+                                                               FontSize="12.5" Foreground="#1E40AF" TextWrapping="Wrap"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </Border>
 
                                         <!-- Visor de contenido Markdown / Texto -->
                                         <Border Style="{StaticResource TarjetaFigma}" Background="#FFFFFF">

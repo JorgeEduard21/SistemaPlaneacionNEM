@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -120,16 +122,37 @@ namespace Frontend.ViewModels
         public string CampoFormativo
         {
             get => _campoFormativo;
-            set { SetProperty(ref _campoFormativo, value); }
+            set
+            {
+                if (SetProperty(ref _campoFormativo, value))
+                {
+                    _ = CargarCatalogoAsync();
+                }
+            }
         }
 
         public GrupoOpciones EjesArticuladoresOpciones { get; }
+
+        private bool _sincronizandoCatalogo;
 
         private string _contenido = "";
         public string Contenido
         {
             get => _contenido;
-            set { SetProperty(ref _contenido, value); }
+            set
+            {
+                if (SetProperty(ref _contenido, value) && !_sincronizandoCatalogo)
+                {
+                    if (_contenidoCatalogoSeleccionado != null &&
+                        !string.Equals(_contenidoCatalogoSeleccionado.Titulo, value?.Trim(), StringComparison.OrdinalIgnoreCase))
+                    {
+                        _contenidoCatalogoSeleccionado = null;
+                        OnPropertyChanged(nameof(ContenidoCatalogoSeleccionado));
+                        PdaSugeridosCatalogo.Clear();
+                        OnPropertyChanged(nameof(TienePdaSugeridosCatalogo));
+                    }
+                }
+            }
         }
 
         private string _subcontenido = "";
@@ -147,6 +170,60 @@ namespace Frontend.ViewModels
         }
 
         public ListaEditable PdaLista { get; }
+
+        // --- Catálogo Precargado NEM (Contenidos y PDA) ---
+        private readonly List<ContenidoCatalogo> _catalogoCompleto = new();
+        public ObservableCollection<ContenidoCatalogo> ContenidosFiltrados { get; } = new();
+        public ObservableCollection<PdaSugeridoCatalogo> PdaSugeridosCatalogo { get; } = new();
+
+        private string _filtroCatalogo = "";
+        public string FiltroCatalogo
+        {
+            get => _filtroCatalogo;
+            set
+            {
+                if (SetProperty(ref _filtroCatalogo, value))
+                {
+                    AplicarFiltroCatalogo();
+                }
+            }
+        }
+
+        private ContenidoCatalogo? _contenidoCatalogoSeleccionado;
+        public ContenidoCatalogo? ContenidoCatalogoSeleccionado
+        {
+            get => _contenidoCatalogoSeleccionado;
+            set
+            {
+                if (SetProperty(ref _contenidoCatalogoSeleccionado, value))
+                {
+                    AlSeleccionarContenidoCatalogo(value);
+                }
+            }
+        }
+
+        public bool TienePdaSugeridosCatalogo => PdaSugeridosCatalogo.Count > 0;
+        public bool TieneContenidosFiltrados => ContenidosFiltrados.Count > 0;
+
+        public string GradosActivosCatalogoTexto
+        {
+            get
+            {
+                var grados = ConfiguracionVM.PerfilGuardado.Grados;
+                return grados != null && grados.Count > 0
+                    ? $"Mostrando contenidos oficiales para: {string.Join(", ", grados)}"
+                    : "Mostrando todos los grados de Primaria (configura tu grado en Configuración para filtrar automáticamente)";
+            }
+        }
+
+        public string GradosPerfilResumenTexto
+        {
+            get
+            {
+                var g = ConfiguracionVM.PerfilGuardado.Grados;
+                return g != null && g.Count > 0 ? string.Join(", ", g) : "Sin definir";
+            }
+        }
 
         // --- 2. Diseño de la Planeación ---
         public ObservableCollection<string> Metodologias { get; } = new()
@@ -240,10 +317,7 @@ namespace Frontend.ViewModels
 
         public bool TienePlaneacionGenerada => PlaneacionActual != null;
 
-        // Campo de respaldo para el texto resultado Markdown
         private string _textoResultadoMarkdown = string.Empty;
-
-        // Propiedad ahora escribible con notificación de cambio
         public string TextoResultadoMarkdown
         {
             get => _textoResultadoMarkdown;
@@ -271,7 +345,14 @@ namespace Frontend.ViewModels
         public ICommand IrAVistaHistorialCommand { get; }
         public ICommand GenerarPlaneacionCommand { get; }
         public ICommand DescargarWordCommand { get; }
+        public ICommand AbrirEnGoogleDocsCommand { get; }
+        public ICommand CopiarPlaneacionCommand { get; }
+        public ICommand SeleccionarTodosPdaCommand { get; }
+        public ICommand LimpiarPdaCommand { get; }
+        public ICommand GuardarContenidoPersonalizadoCommand { get; }
         public ICommand CargarDetalleHistorialCommand { get; }
+        public ICommand AbrirGoogleDocsHistorialCommand { get; }
+        public ICommand DescargarWordHistorialCommand { get; }
         public ICommand EliminarDeHistorialCommand { get; }
         public ICommand CerrarNotificacionCommand { get; }
 
@@ -280,6 +361,13 @@ namespace Frontend.ViewModels
             _api = new ApiClient();
             _backendManager = new BackendManager(_api);
             ConfiguracionVM = new ConfiguracionViewModel(this, _api);
+
+            ConfiguracionVM.PerfilActualizado += (_, _) =>
+            {
+                OnPropertyChanged(nameof(GradosActivosCatalogoTexto));
+                OnPropertyChanged(nameof(GradosPerfilResumenTexto));
+                _ = CargarCatalogoAsync();
+            };
 
             // Ejes articuladores con multiselección
             EjesArticuladoresOpciones = new GrupoOpciones(true);
@@ -292,12 +380,11 @@ namespace Frontend.ViewModels
                                      .Agregar("Artes y Experiencias Estéticas");
 
             PdaLista = new ListaEditable();
+            PdaLista.Cambio += (_, _) => SincronizarChecksPdaSugeridos();
             CriteriosLista = new ListaEditable();
 
-            // Notificar cambios en la existencia de elementos del historial
             Historial.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TienePlaneacionesEnHistorial));
 
-            // Configurar manejador global de errores en AsyncRelayCommand
             AsyncRelayCommand.ManejadorErroresGlobal = ex =>
             {
                 Notificar(ex.Message, esError: true);
@@ -317,12 +404,21 @@ namespace Frontend.ViewModels
             IrAVistaConfiguracionCommand = new RelayCommand(_ => { VistaActual = 1; _ = ConfiguracionVM.CargarAsync(); });
             IrAVistaHistorialCommand = new RelayCommand(_ => { VistaActual = 2; _ = CargarHistorialAsync(); });
 
-            // Generación de planeación con IA
+            // Comandos del Catálogo NEM
+            SeleccionarTodosPdaCommand = new RelayCommand(_ => SeleccionarTodosPdaSugeridos(), _ => TienePdaSugeridosCatalogo);
+            LimpiarPdaCommand = new RelayCommand(_ => LimpiarTodosPda(), _ => !PdaLista.EstaVacia);
+            GuardarContenidoPersonalizadoCommand = new AsyncRelayCommand(_ => GuardarContenidoPersonalizadoAsync(), _ => !string.IsNullOrWhiteSpace(Contenido));
+
+            // Generación y exportación de planeación
             GenerarPlaneacionCommand = new AsyncRelayCommand(_ => GenerarPlaneacionAsync(), _ => !GenerandoPlaneacion);
             DescargarWordCommand = new AsyncRelayCommand(_ => DescargarWordAsync(), _ => TienePlaneacionGenerada);
+            AbrirEnGoogleDocsCommand = new RelayCommand(_ => AbrirEnGoogleDocs(PlaneacionActual), _ => TienePlaneacionGenerada);
+            CopiarPlaneacionCommand = new RelayCommand(_ => CopiarPlaneacionAlPortapapeles(PlaneacionActual), _ => TienePlaneacionGenerada);
 
             // Historial
             CargarDetalleHistorialCommand = new AsyncRelayCommand(p => CargarDetalleHistorialAsync(p as ResumenPlaneacion));
+            AbrirGoogleDocsHistorialCommand = new AsyncRelayCommand(p => AbrirGoogleDocsDesdeHistorialAsync(p as ResumenPlaneacion));
+            DescargarWordHistorialCommand = new AsyncRelayCommand(p => DescargarWordDesdeHistorialAsync(p as ResumenPlaneacion));
             EliminarDeHistorialCommand = new AsyncRelayCommand(p => EliminarDeHistorialAsync(p as ResumenPlaneacion));
 
             CerrarNotificacionCommand = new RelayCommand(_ => MensajeNotificacion = null);
@@ -338,14 +434,192 @@ namespace Frontend.ViewModels
                 await _backendManager.IniciarAsync();
                 BackendConectado = true;
                 await ConfiguracionVM.CargarAsync();
+                await CargarCatalogoAsync();
                 await CargarHistorialAsync();
-                Notificar("Backend conectado correctamente.");
+                Notificar("Sistema listo y catálogo NEM cargado.");
             }
             catch (Exception ex)
             {
                 BackendConectado = false;
                 Notificar($"Error al iniciar el servidor local de IA: {ex.Message}", esError: true);
             }
+        }
+
+        // ============================================================ Catálogo NEM
+        public async Task CargarCatalogoAsync()
+        {
+            if (!BackendConectado) return;
+            try
+            {
+                var grados = ConfiguracionVM.PerfilGuardado.Grados;
+                var items = await _api.ObtenerCatalogoAsync(CampoFormativo, grados);
+                _catalogoCompleto.Clear();
+                _catalogoCompleto.AddRange(items);
+                AplicarFiltroCatalogo();
+            }
+            catch (Exception ex)
+            {
+                Notificar($"No se pudo cargar el catálogo NEM: {ex.Message}", esError: true);
+            }
+        }
+
+        private void AplicarFiltroCatalogo()
+        {
+            var previoId = _contenidoCatalogoSeleccionado?.Id;
+            ContenidosFiltrados.Clear();
+
+            var filtro = (FiltroCatalogo ?? "").Trim();
+            IEnumerable<ContenidoCatalogo> fuente = _catalogoCompleto;
+
+            if (!string.IsNullOrEmpty(filtro))
+            {
+                fuente = fuente.Where(c =>
+                    c.Titulo.Contains(filtro, StringComparison.OrdinalIgnoreCase) ||
+                    c.Pda.Values.SelectMany(x => x).Any(p => p.Contains(filtro, StringComparison.OrdinalIgnoreCase)));
+            }
+
+            foreach (var item in fuente)
+            {
+                ContenidosFiltrados.Add(item);
+            }
+
+            OnPropertyChanged(nameof(TieneContenidosFiltrados));
+
+            if (previoId != null)
+            {
+                _contenidoCatalogoSeleccionado = ContenidosFiltrados.FirstOrDefault(c => c.Id == previoId);
+                OnPropertyChanged(nameof(ContenidoCatalogoSeleccionado));
+            }
+        }
+
+        private void AlSeleccionarContenidoCatalogo(ContenidoCatalogo? item)
+        {
+            PdaSugeridosCatalogo.Clear();
+            if (item == null)
+            {
+                OnPropertyChanged(nameof(TienePdaSugeridosCatalogo));
+                return;
+            }
+
+            _sincronizandoCatalogo = true;
+            try
+            {
+                Contenido = item.Titulo;
+
+                // Poblar los PDA sugeridos de este contenido y seleccionarlos automáticamente para ahorrar clics
+                var nuevosPda = new List<string>();
+                foreach (var kv in item.Pda)
+                {
+                    var grado = kv.Key;
+                    foreach (var textoPda in kv.Value)
+                    {
+                        nuevosPda.Add(textoPda);
+                        var sugerido = new PdaSugeridoCatalogo(grado, textoPda, seleccionado: true, AlCambiarPdaSugerido);
+                        PdaSugeridosCatalogo.Add(sugerido);
+                    }
+                }
+
+                PdaLista.Establecer(nuevosPda);
+            }
+            finally
+            {
+                _sincronizandoCatalogo = false;
+            }
+
+            OnPropertyChanged(nameof(TienePdaSugeridosCatalogo));
+        }
+
+        private void AlCambiarPdaSugerido(PdaSugeridoCatalogo pda)
+        {
+            if (_sincronizandoCatalogo) return;
+            _sincronizandoCatalogo = true;
+            try
+            {
+                var existentes = PdaLista.Elementos.ToList();
+                var match = existentes.FirstOrDefault(x => string.Equals(x, pda.Texto, StringComparison.OrdinalIgnoreCase));
+                if (pda.Seleccionado && match == null)
+                {
+                    PdaLista.Elementos.Add(pda.Texto);
+                }
+                else if (!pda.Seleccionado && match != null)
+                {
+                    PdaLista.Elementos.Remove(match);
+                }
+            }
+            finally
+            {
+                _sincronizandoCatalogo = false;
+            }
+        }
+
+        private void SincronizarChecksPdaSugeridos()
+        {
+            if (_sincronizandoCatalogo) return;
+            _sincronizandoCatalogo = true;
+            try
+            {
+                var activos = new HashSet<string>(PdaLista.Elementos, StringComparer.OrdinalIgnoreCase);
+                foreach (var item in PdaSugeridosCatalogo)
+                {
+                    item.EstablecerSinNotificar(activos.Contains(item.Texto));
+                }
+            }
+            finally
+            {
+                _sincronizandoCatalogo = false;
+            }
+        }
+
+        private void SeleccionarTodosPdaSugeridos()
+        {
+            _sincronizandoCatalogo = true;
+            try
+            {
+                foreach (var item in PdaSugeridosCatalogo)
+                {
+                    item.EstablecerSinNotificar(true);
+                    if (!PdaLista.Elementos.Any(x => string.Equals(x, item.Texto, StringComparison.OrdinalIgnoreCase)))
+                        PdaLista.Elementos.Add(item.Texto);
+                }
+            }
+            finally
+            {
+                _sincronizandoCatalogo = false;
+            }
+        }
+
+        private void LimpiarTodosPda()
+        {
+            _sincronizandoCatalogo = true;
+            try
+            {
+                PdaLista.Establecer( Array.Empty<string>() );
+                foreach (var item in PdaSugeridosCatalogo)
+                    item.EstablecerSinNotificar(false);
+            }
+            finally
+            {
+                _sincronizandoCatalogo = false;
+            }
+        }
+
+        private async Task GuardarContenidoPersonalizadoAsync()
+        {
+            if (string.IsNullOrWhiteSpace(Contenido)) return;
+
+            var grados = ConfiguracionVM.PerfilGuardado.Grados;
+            if (grados == null || grados.Count == 0)
+                grados = new List<string> { "1° Primaria" };
+
+            var nuevo = await _api.AgregarContenidoCatalogoAsync(
+                CampoFormativo,
+                Contenido.Trim(),
+                grados,
+                PdaLista.ComoLista());
+
+            await CargarCatalogoAsync();
+            ContenidoCatalogoSeleccionado = ContenidosFiltrados.FirstOrDefault(c => c.Id == nuevo.Id);
+            Notificar("Contenido y PDA guardados en tu catálogo personal para futuras planeaciones.");
         }
 
         private void AvanzarPaso()
@@ -362,12 +636,11 @@ namespace Frontend.ViewModels
 
         public async Task GenerarPlaneacionAsync()
         {
-            // Validaciones
             if (ConfiguracionVM.Estado?.ApiKeyConfigurada != true)
             {
                 Notificar("No has configurado tu API key de Gemini. Ve al menú de Configuración para agregarla.", esError: true);
                 VistaActual = 1;
-                ConfiguracionVM.SeccionActual = 1; // Pestaña de API Key
+                ConfiguracionVM.SeccionActual = 1;
                 return;
             }
 
@@ -375,20 +648,20 @@ namespace Frontend.ViewModels
             {
                 Notificar("Debes completar el contexto de tu grupo una vez en Configuración.", esError: true);
                 VistaActual = 1;
-                ConfiguracionVM.SeccionActual = 0; // Pestaña de Perfil
+                ConfiguracionVM.SeccionActual = 0;
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(Contenido))
             {
-                Notificar("Debes escribir el contenido curricular en el Paso 1.", esError: true);
+                Notificar("Selecciona o escribe el contenido curricular en el Paso 1.", esError: true);
                 PasoActual = 0;
                 return;
             }
 
             if (string.IsNullOrWhiteSpace(TemaInteres))
             {
-                Notificar("Debes indicar el tema de interés o proyecto central en el Paso 2.", esError: true);
+                Notificar("Indica el tema de interés o proyecto central en el Paso 2.", esError: true);
                 PasoActual = 1;
                 return;
             }
@@ -436,7 +709,7 @@ namespace Frontend.ViewModels
                 var resultado = await _api.GenerarPlaneacionAsync(solicitud, cts.Token);
                 PlaneacionActual = resultado;
                 _ = CargarHistorialAsync();
-                PasoActual = 3; // Mostrar pantalla de resumen/resultado
+                PasoActual = 3;
                 Notificar("¡Planeación didáctica generada exitosamente!");
             }
             catch (Exception ex)
@@ -452,10 +725,14 @@ namespace Frontend.ViewModels
         public async Task DescargarWordAsync()
         {
             if (PlaneacionActual == null) return;
+            await DescargarWordDePlaneacionAsync(PlaneacionActual.Id);
+        }
 
+        private async Task DescargarWordDePlaneacionAsync(string planeacionId)
+        {
             try
             {
-                var (contenido, nombre) = await _api.DescargarDocxAsync(PlaneacionActual.Id);
+                var (contenido, nombre) = await _api.DescargarDocxAsync(planeacionId);
                 var rutaDescargas = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "Downloads",
@@ -474,6 +751,36 @@ namespace Frontend.ViewModels
             catch (Exception ex)
             {
                 Notificar($"Error al descargar archivo Word: {ex.Message}", esError: true);
+            }
+        }
+
+        public void AbrirEnGoogleDocs(Planeacion? planeacion)
+        {
+            if (planeacion == null) return;
+
+            try
+            {
+                ExportadorGoogleDocs.CopiarConFormatoParaGoogleDocs(planeacion);
+                Process.Start(new ProcessStartInfo("https://docs.new") { UseShellExecute = true });
+                Notificar("¡Planeación copiada con formato (tablas, títulos y listas)! En la pestaña de Google Docs que se abrió, solo presiona Ctrl + V para pegarla.");
+            }
+            catch (Exception ex)
+            {
+                Notificar($"No se pudo abrir Google Docs: {ex.Message}", esError: true);
+            }
+        }
+
+        public void CopiarPlaneacionAlPortapapeles(Planeacion? planeacion)
+        {
+            if (planeacion == null) return;
+            try
+            {
+                ExportadorGoogleDocs.CopiarConFormatoParaGoogleDocs(planeacion);
+                Notificar("Planeación copiada al portapapeles con formato enriquecido (lista para pegar en Google Docs, Word o correo).");
+            }
+            catch (Exception ex)
+            {
+                Notificar($"No se pudo copiar al portapapeles: {ex.Message}", esError: true);
             }
         }
 
@@ -503,7 +810,7 @@ namespace Frontend.ViewModels
             {
                 var plan = await _api.ObtenerPlaneacionAsync(resumen.Id);
                 PlaneacionActual = plan;
-                VistaActual = 0; // Ir a la pantalla de visualización
+                VistaActual = 0;
                 PasoActual = 3;
                 Notificar($"Planeación '{plan.Titulo}' cargada.");
             }
@@ -511,6 +818,20 @@ namespace Frontend.ViewModels
             {
                 Notificar($"Error al abrir planeación: {ex.Message}", esError: true);
             }
+        }
+
+        private async Task AbrirGoogleDocsDesdeHistorialAsync(ResumenPlaneacion? resumen)
+        {
+            if (resumen == null) return;
+            var plan = await _api.ObtenerPlaneacionAsync(resumen.Id);
+            PlaneacionActual = plan;
+            AbrirEnGoogleDocs(plan);
+        }
+
+        private async Task DescargarWordDesdeHistorialAsync(ResumenPlaneacion? resumen)
+        {
+            if (resumen == null) return;
+            await DescargarWordDePlaneacionAsync(resumen.Id);
         }
 
         public async Task EliminarDeHistorialAsync(ResumenPlaneacion? resumen)
@@ -556,6 +877,8 @@ namespace Frontend.ViewModels
 
             MostrarAlertaApiKey = !estado.ApiKeyConfigurada;
             MostrarAlertaPerfil = !estado.PerfilConfigurado;
+            OnPropertyChanged(nameof(GradosActivosCatalogoTexto));
+            OnPropertyChanged(nameof(GradosPerfilResumenTexto));
 
             if (estado.ApiKeyConfigurada)
             {

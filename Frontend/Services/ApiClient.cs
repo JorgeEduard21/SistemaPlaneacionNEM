@@ -66,6 +66,22 @@ namespace Frontend.Services
         public Task<PerfilGrupo> GuardarPerfilAsync(PerfilGrupo perfil)
             => EnviarAsync<PerfilGrupo>(HttpMethod.Put, "api/perfil", perfil);
 
+        // ---------------------------------------------------------------- Catálogo
+        public Task<List<ContenidoCatalogo>> ObtenerCatalogoAsync(string campo, IEnumerable<string>? grados = null)
+        {
+            var q = $"api/catalogo?campo={Uri.EscapeDataString(campo)}";
+            if (grados != null)
+            {
+                var g = string.Join(",", grados);
+                q += $"&grados={Uri.EscapeDataString(g)}";
+            }
+            return EnviarAsync<List<ContenidoCatalogo>>(HttpMethod.Get, q);
+        }
+
+        public Task<ContenidoCatalogo> AgregarContenidoCatalogoAsync(string campo, string titulo, List<string> grados, List<string> pda)
+            => EnviarAsync<ContenidoCatalogo>(HttpMethod.Post, "api/catalogo/contenidos", new { campo, titulo, grados, pda });
+
+
         // ------------------------------------------------------------ Planeaciones
         public Task<Planeacion> GenerarPlaneacionAsync(SolicitudPlaneacion solicitud, CancellationToken ct)
             => EnviarAsync<Planeacion>(HttpMethod.Post, "api/planeaciones/generar", solicitud, TiempoGeneracion, ct);

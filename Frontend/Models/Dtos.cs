@@ -109,6 +109,32 @@ namespace Frontend.Models
         [JsonIgnore] public string GradosTexto => string.Join(", ", Grados);
     }
 
+    public class ContenidoCatalogo
+    {
+        public string Id { get; set; } = "";
+        public string Campo { get; set; } = "";
+        public int Fase { get; set; }
+        public string Titulo { get; set; } = "";
+        public Dictionary<string, List<string>> Pda { get; set; } = new();
+        public bool Personalizado { get; set; }
+        public Dictionary<string, List<string>> PdaPersonalizados { get; set; } = new();
+
+        [JsonIgnore]
+        public string FaseTexto => $"Fase {Fase}";
+
+        [JsonIgnore]
+        public int TotalPda
+        {
+            get
+            {
+                var n = 0;
+                foreach (var lista in Pda.Values)
+                    n += lista.Count;
+                return n;
+            }
+        }
+    }
+
     public static class Fechas
     {
         private static readonly CultureInfo Es = new("es-MX");

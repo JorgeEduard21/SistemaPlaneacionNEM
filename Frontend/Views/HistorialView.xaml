@@ -15,7 +15,7 @@
         <!-- Cabecera -->
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="📂 Mis Planeaciones Didácticas" FontSize="30" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia" Margin="0,0,0,6"/>
-            <TextBlock Text="Consulta, descarga en formato Word o revisa cualquier planeación generada anteriormente." FontSize="15" Foreground="#5C5C5C"/>
+            <TextBlock Text="Consulta, abre en Google Docs, descarga en formato Word o revisa cualquier planeación generada anteriormente." FontSize="15" Foreground="#5C5C5C"/>
         </StackPanel>
 
         <!-- Lista vacía -->
@@ -74,14 +74,25 @@
 
                                 <!-- Acciones -->
                                 <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                                    <Button Content="Ver Planeación 👁️" 
+                                    <Button Content="Ver 👁️" 
                                             Command="{Binding DataContext.CargarDetalleHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource BotonNaranja}" Padding="16,10" Margin="0,0,10,0"/>
-                                    <Button Content="Eliminar 🗑️" 
+                                            Style="{StaticResource BotonNaranja}" Padding="14,10" Margin="0,0,8,0"/>
+                                    <Button Content="Google Docs 🌐" 
+                                            Command="{Binding DataContext.AbrirGoogleDocsHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource BotonGoogleDocs}" Padding="14,10" Margin="0,0,8,0"
+                                            ToolTip="Copia la planeación con formato y abre un nuevo documento de Google Docs listo para pegar con Ctrl+V"/>
+                                    <Button Content="Word 📄" 
+                                            Command="{Binding DataContext.DescargarWordHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource BotonGris}" Padding="14,10" Margin="0,0,8,0"
+                                            ToolTip="Descargar en formato Microsoft Word (.docx)"/>
+                                    <Button Content="🗑️" 
                                             Command="{Binding DataContext.EliminarDeHistorialCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
                                             CommandParameter="{Binding}"
-                                            Style="{StaticResource BotonGris}" Padding="14,10"/>
+                                            Style="{StaticResource BotonGris}" Padding="12,10"
+                                            ToolTip="Eliminar planeación"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

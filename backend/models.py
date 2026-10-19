@@ -1,5 +1,5 @@
 """Modelos de datos (Pydantic) compartidos por la API."""
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -143,4 +143,33 @@ class ActualizarPlaneacion(BaseModel):
     titulo: Optional[str] = None
     contenido: Optional[str] = None
     favorita: Optional[bool] = None
+
+
+# ---------------------------------------------------------------------------
+# Catálogo NEM (contenidos y PDA precargados + personalizados)
+# ---------------------------------------------------------------------------
+class ContenidoCatalogo(BaseModel):
+    id: str
+    campo: str
+    fase: int
+    titulo: str
+    pda: Dict[str, List[str]] = Field(default_factory=dict)
+    personalizado: bool = False
+    pda_personalizados: Dict[str, List[str]] = Field(default_factory=dict)
+
+
+class NuevoContenidoCatalogo(BaseModel):
+    campo: str = Field(..., min_length=1)
+    titulo: str = Field(..., min_length=3, max_length=500)
+    grados: List[str] = Field(default_factory=list)
+    pda: List[str] = Field(default_factory=list)
+
+    _norm = field_validator("grados", "pda")(_limpiar_lista)
+
+
+class NuevoPdaCatalogo(BaseModel):
+    contenido_id: str = Field(..., min_length=1)
+    grado: str = Field(..., min_length=1)
+    texto: str = Field(..., min_length=3, max_length=600)
+
 

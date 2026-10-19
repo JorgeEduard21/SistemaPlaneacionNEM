@@ -77,7 +77,7 @@ namespace Frontend.Converters
             if (value is bool b && b && parameter != null)
             {
                 var tipo = Nullable.GetUnderlyingType(targetType) ?? targetType;
-                return System.Convert.ChangeType(parameter.ToString(), tipo, CultureInfo.InvariantCulture);
+                return System.Convert.ChangeType(parameter.ToString(), tipo, CultureInfo.InvariantCulture) ?? Binding.DoNothing;
             }
             return Binding.DoNothing;
         }

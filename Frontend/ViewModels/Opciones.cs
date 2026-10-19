@@ -145,5 +145,38 @@ namespace Frontend.ViewModels
             Cambio?.Invoke(this, EventArgs.Empty);
         }
     }
+
+    /// <summary>PDA precargado del catálogo NEM para seleccionar con un clic.</summary>
+    public class PdaSugeridoCatalogo : ViewModelBase
+    {
+        private bool _seleccionado;
+        private readonly Action<PdaSugeridoCatalogo>? _alCambiar;
+
+        public string Grado { get; }
+        public string Texto { get; }
+
+        public PdaSugeridoCatalogo(string grado, string texto, bool seleccionado = false, Action<PdaSugeridoCatalogo>? alCambiar = null)
+        {
+            Grado = grado;
+            Texto = texto;
+            _seleccionado = seleccionado;
+            _alCambiar = alCambiar;
+        }
+
+        public bool Seleccionado
+        {
+            get => _seleccionado;
+            set
+            {
+                if (SetProperty(ref _seleccionado, value))
+                    _alCambiar?.Invoke(this);
+            }
+        }
+
+        internal void EstablecerSinNotificar(bool valor)
+        {
+            SetProperty(ref _seleccionado, valor, nameof(Seleccionado));
+        }
+    }
 }
 

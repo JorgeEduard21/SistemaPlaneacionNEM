@@ -1,4 +1,6 @@
+using System.ComponentModel;
 using System.Windows;
+using Frontend.ViewModels;
 
 namespace Frontend
 {
@@ -10,6 +12,15 @@ namespace Frontend
         public MainWindow()
         {
             InitializeComponent();
+            Closing += MainWindow_Closing;
+        }
+
+        private void MainWindow_Closing(object? sender, CancelEventArgs e)
+        {
+            if (DataContext is MainViewModel vm)
+            {
+                vm.CerrarBackend();
+            }
         }
     }
 }
