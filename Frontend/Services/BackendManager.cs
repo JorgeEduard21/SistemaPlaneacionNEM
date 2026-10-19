@@ -20,17 +20,16 @@ namespace Frontend.Services
         {
             if (await _api.EstaDisponibleAsync(ct)) return; // ya está corriendo (p. ej. iniciado a mano)
 
-            var carpeta = BuscarCarpetaBackend()
+            var lanzador = BuscarLanzadorBackend()
                 ?? throw new InvalidOperationException(
-                    "No se encontró la carpeta 'backend' con main.py. " +
-                    "Define la variable de entorno PLANEACION_NEM_BACKEND con su ruta.");
+                    "No se encontró el backend (backend.exe o main.py). " +
+                    "Verifica la instalación o define la variable de entorno PLANEACION_NEM_BACKEND.");
 
-            var python = BuscarPython(carpeta);
             _errores.Clear();
 
-            var info = new ProcessStartInfo(python, "main.py")
+            var info = new ProcessStartInfo(lanzador.ejecutable, lanzador.argumentos)
             {
-                WorkingDirectory = carpeta,
+                WorkingDirectory = lanzador.directorioTrabajo,
                 UseShellExecute = false,
                 CreateNoWindow = true,
                 RedirectStandardError = true,
@@ -43,12 +42,12 @@ namespace Frontend.Services
 
             try
             {
-                _proceso = Process.Start(info) ?? throw new InvalidOperationException("No se pudo iniciar Python.");
+                _proceso = Process.Start(info) ?? throw new InvalidOperationException("No se pudo iniciar el servicio de backend.");
             }
             catch (System.ComponentModel.Win32Exception)
             {
                 throw new InvalidOperationException(
-                    "No se encontró Python. Instálalo desde python.org y ejecuta 'backend\\instalar.bat'.");
+                    "No se pudo ejecutar el backend. Si estás en modo desarrollo, asegúrate de tener Python instalado.");
             }
 
             _proceso.ErrorDataReceived += (_, e) => { if (e.Data != null) lock (_errores) _errores.AppendLine(e.Data); };
@@ -76,7 +75,7 @@ namespace Frontend.Services
                 return "Faltan dependencias de Python. Ejecuta 'backend\\instalar.bat' una vez y vuelve a intentar.\n\n" + log;
             if (log.Contains("address already in use") || log.Contains("10048"))
                 return $"El puerto {ApiClient.Puerto} está ocupado por otro programa.\n\n" + log;
-            return "El servidor de Python se cerró inesperadamente.\n\n" + log;
+            return "El servidor del backend se cerró inesperadamente.\n\n" + log;
         }
 
         private string UltimasLineas()
@@ -88,20 +87,49 @@ namespace Frontend.Services
             }
         }
 
-        private static string? BuscarCarpetaBackend()
+        private static (string ejecutable, string argumentos, string directorioTrabajo)? BuscarLanzadorBackend()
         {
             var personalizada = Environment.GetEnvironmentVariable("PLANEACION_NEM_BACKEND");
-            if (!string.IsNullOrWhiteSpace(personalizada) && File.Exists(Path.Combine(personalizada, "main.py")))
-                return personalizada;
+            if (!string.IsNullOrWhiteSpace(personalizada))
+            {
+                var exeCustom = Path.Combine(personalizada, "backend.exe");
+                if (File.Exists(exeCustom))
+                    return (exeCustom, "", personalizada);
 
-            // Sube desde bin\Debug\net8.0-windows hasta encontrar ...\backend\main.py
-            var dir = new DirectoryInfo(AppContext.BaseDirectory);
+                if (File.Exists(Path.Combine(personalizada, "main.py")))
+                    return (BuscarPython(personalizada), "main.py", personalizada);
+            }
+
+            var dirBase = AppContext.BaseDirectory;
+
+            // 1. Producción instalada: backend/backend.exe dentro de la carpeta instalada
+            var exeEnBackend = Path.Combine(dirBase, "backend", "backend.exe");
+            if (File.Exists(exeEnBackend))
+                return (exeEnBackend, "", Path.Combine(dirBase, "backend"));
+
+            // 2. Producción instalada: backend.exe al lado de Frontend.exe
+            var exeAlLado = Path.Combine(dirBase, "backend.exe");
+            if (File.Exists(exeAlLado))
+                return (exeAlLado, "", dirBase);
+
+            // 3. Modo desarrollo: subir directorios buscando la carpeta backend
+            var dir = new DirectoryInfo(dirBase);
             while (dir != null)
             {
                 var candidata = Path.Combine(dir.FullName, "backend");
-                if (File.Exists(Path.Combine(candidata, "main.py"))) return candidata;
+                if (Directory.Exists(candidata))
+                {
+                    // Buscar si fue compilado con PyInstaller en dist/backend/backend.exe
+                    var exeDist = Path.Combine(candidata, "dist", "backend", "backend.exe");
+                    if (File.Exists(exeDist))
+                        return (exeDist, "", Path.Combine(candidata, "dist", "backend"));
+
+                    if (File.Exists(Path.Combine(candidata, "main.py")))
+                        return (BuscarPython(candidata), "main.py", candidata);
+                }
                 dir = dir.Parent;
             }
+
             return null;
         }
 

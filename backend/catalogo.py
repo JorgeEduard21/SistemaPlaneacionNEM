@@ -6,6 +6,7 @@
 """
 import json
 import re
+import sys
 import threading
 import uuid
 from functools import lru_cache
@@ -15,7 +16,21 @@ from typing import Dict, List, Optional
 import almacenamiento as db
 from models import ContenidoCatalogo
 
-DIR_CATALOGO = Path(__file__).resolve().parent / "catalogo"
+
+def _resolver_dir_catalogo() -> Path:
+    p = Path(__file__).resolve().parent / "catalogo"
+    if p.exists():
+        return p
+    if getattr(sys, "frozen", False):
+        base = Path(sys.executable).resolve().parent
+        if (base / "catalogo").exists():
+            return base / "catalogo"
+        if (base / "_internal" / "catalogo").exists():
+            return base / "_internal" / "catalogo"
+    return p
+
+
+DIR_CATALOGO = _resolver_dir_catalogo()
 ARCHIVO_PERSONAL = db.DIR_DATOS / "catalogo_personal.json"
 
 CAMPOS = [
