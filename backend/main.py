@@ -255,5 +255,7 @@ def descargar_docx(planeacion_id: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host=HOST, port=PUERTO, log_level="info")
+    # Usamos http="h11" y loop="asyncio" para asegurar el uso de código 100% Python
+    # evitando extensiones C binarias sin firmar (como httptools .pyd) que bloquea Windows Defender / Smart App Control
+    uvicorn.run(app, host=HOST, port=PUERTO, http="h11", loop="asyncio", log_level="info")
 
