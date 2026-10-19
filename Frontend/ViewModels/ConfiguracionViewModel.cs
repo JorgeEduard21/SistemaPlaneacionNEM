@@ -53,7 +53,18 @@ namespace Frontend.ViewModels
         public int SeccionActual { get => _seccionActual; set => SetProperty(ref _seccionActual, value); }
 
         // ================================================================== Perfil
-        public PerfilGrupo PerfilGuardado { get; private set; } = new();
+        private PerfilGrupo _perfilGuardado = new();
+        public PerfilGrupo PerfilGuardado
+        {
+            get => _perfilGuardado;
+            private set
+            {
+                if (SetProperty(ref _perfilGuardado, value))
+                {
+                    OnPropertyChanged(nameof(UltimaActualizacion));
+                }
+            }
+        }
 
         private string _nombreDocente = "";
         public string NombreDocente { get => _nombreDocente; set { if (SetProperty(ref _nombreDocente, value)) MarcarCambio(); } }

@@ -220,8 +220,55 @@ namespace Frontend.ViewModels
         {
             get
             {
-                var g = ConfiguracionVM.PerfilGuardado.Grados;
-                return g != null && g.Count > 0 ? string.Join(", ", g) : "Sin definir";
+                var g = ConfiguracionVM.PerfilGuardado?.Grados;
+                return g != null && g.Count > 0 ? string.Join(", ", g) : "Sin definir (configurar en Contexto)";
+            }
+        }
+
+        public string AlumnosPerfilResumenTexto
+        {
+            get
+            {
+                var n = ConfiguracionVM.PerfilGuardado?.CantidadAlumnos;
+                return n.HasValue ? $"{n.Value} alumnos" : "Sin definir (configurar en Contexto)";
+            }
+        }
+
+        public string EntornoPerfilResumenTexto
+        {
+            get
+            {
+                var e = ConfiguracionVM.PerfilGuardado?.Entorno;
+                return !string.IsNullOrWhiteSpace(e) ? e : "Sin definir (configurar en Contexto)";
+            }
+        }
+
+        public string DocenteEscuelaResumenTexto
+        {
+            get
+            {
+                var d = ConfiguracionVM.PerfilGuardado?.NombreDocente;
+                var esc = ConfiguracionVM.PerfilGuardado?.Escuela;
+                if (!string.IsNullOrWhiteSpace(d) && !string.IsNullOrWhiteSpace(esc))
+                    return $"{d} · {esc}";
+                if (!string.IsNullOrWhiteSpace(d)) return d;
+                if (!string.IsNullOrWhiteSpace(esc)) return esc;
+                return "";
+            }
+        }
+
+        public bool TieneDocenteOEscuela => !string.IsNullOrWhiteSpace(DocenteEscuelaResumenTexto);
+
+        public bool PerfilEstaCompleto => ConfiguracionVM.PerfilGuardado?.EstaCompleto == true;
+        public bool PerfilIncompleto => !PerfilEstaCompleto;
+
+        public string ResumenPdasSeleccionadosTexto
+        {
+            get
+            {
+                var count = PdaLista.Elementos.Count;
+                if (count == 0) return "🎯 Ningún PDA seleccionado aún";
+                return count == 1 ? "🎯 1 PDA seleccionado para esta planeación" : $"🎯 {count} PDA seleccionados para esta planeación";
             }
         }
 
@@ -364,8 +411,7 @@ namespace Frontend.ViewModels
 
             ConfiguracionVM.PerfilActualizado += (_, _) =>
             {
-                OnPropertyChanged(nameof(GradosActivosCatalogoTexto));
-                OnPropertyChanged(nameof(GradosPerfilResumenTexto));
+                NotificarCambiosPerfil();
                 _ = CargarCatalogoAsync();
             };
 
@@ -380,7 +426,11 @@ namespace Frontend.ViewModels
                                      .Agregar("Artes y Experiencias Estéticas");
 
             PdaLista = new ListaEditable();
-            PdaLista.Cambio += (_, _) => SincronizarChecksPdaSugeridos();
+            PdaLista.Cambio += (_, _) =>
+            {
+                SincronizarChecksPdaSugeridos();
+                OnPropertyChanged(nameof(ResumenPdasSeleccionadosTexto));
+            };
             CriteriosLista = new ListaEditable();
 
             Historial.CollectionChanged += (_, _) => OnPropertyChanged(nameof(TienePlaneacionesEnHistorial));
@@ -436,7 +486,18 @@ namespace Frontend.ViewModels
                 await ConfiguracionVM.CargarAsync();
                 await CargarCatalogoAsync();
                 await CargarHistorialAsync();
-                Notificar("Sistema listo y catálogo NEM cargado.");
+                NotificarCambiosPerfil();
+
+                if (!ConfiguracionVM.PerfilGuardado.EstaCompleto)
+                {
+                    VistaActual = 1; // Pestaña de Configuración
+                    ConfiguracionVM.SeccionActual = 0; // Pestaña de Contexto del Grupo
+                    Notificar("¡Bienvenido! Por favor completa el contexto de tu grupo (grados, número de alumnos y entorno) una sola vez para comenzar.");
+                }
+                else
+                {
+                    Notificar("Sistema listo y catálogo NEM cargado.");
+                }
             }
             catch (Exception ex)
             {
@@ -871,14 +932,26 @@ namespace Frontend.ViewModels
             return res == MessageBoxResult.Yes;
         }
 
+        public void NotificarCambiosPerfil()
+        {
+            OnPropertyChanged(nameof(GradosActivosCatalogoTexto));
+            OnPropertyChanged(nameof(GradosPerfilResumenTexto));
+            OnPropertyChanged(nameof(AlumnosPerfilResumenTexto));
+            OnPropertyChanged(nameof(EntornoPerfilResumenTexto));
+            OnPropertyChanged(nameof(DocenteEscuelaResumenTexto));
+            OnPropertyChanged(nameof(TieneDocenteOEscuela));
+            OnPropertyChanged(nameof(PerfilEstaCompleto));
+            OnPropertyChanged(nameof(PerfilIncompleto));
+            OnPropertyChanged(nameof(ResumenPdasSeleccionadosTexto));
+        }
+
         public void ActualizarEstado(EstadoConfiguracion? estado)
         {
             if (estado == null) return;
 
             MostrarAlertaApiKey = !estado.ApiKeyConfigurada;
             MostrarAlertaPerfil = !estado.PerfilConfigurado;
-            OnPropertyChanged(nameof(GradosActivosCatalogoTexto));
-            OnPropertyChanged(nameof(GradosPerfilResumenTexto));
+            NotificarCambiosPerfil();
 
             if (estado.ApiKeyConfigurada)
             {
