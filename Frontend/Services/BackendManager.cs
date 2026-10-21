@@ -44,10 +44,10 @@ namespace Frontend.Services
             {
                 _proceso = Process.Start(info) ?? throw new InvalidOperationException("No se pudo iniciar el servicio de backend.");
             }
-            catch (System.ComponentModel.Win32Exception)
+            catch (System.ComponentModel.Win32Exception ex)
             {
                 throw new InvalidOperationException(
-                    "No se pudo ejecutar el backend. Si estás en modo desarrollo, asegúrate de tener Python instalado.");
+                    $"No se pudo ejecutar el servidor local ({lanzador.ejecutable}): {ex.Message}");
             }
 
             _proceso.ErrorDataReceived += (_, e) => { if (e.Data != null) lock (_errores) _errores.AppendLine(e.Data); };
@@ -92,40 +92,29 @@ namespace Frontend.Services
             var personalizada = Environment.GetEnvironmentVariable("PLANEACION_NEM_BACKEND");
             if (!string.IsNullOrWhiteSpace(personalizada))
             {
+                if (File.Exists(Path.Combine(personalizada, "main.py")))
+                    return (BuscarPython(personalizada), "main.py", personalizada);
+
                 var exeCustom = Path.Combine(personalizada, "backend.exe");
                 if (File.Exists(exeCustom))
                     return (exeCustom, "", personalizada);
-
-                if (File.Exists(Path.Combine(personalizada, "main.py")))
-                    return (BuscarPython(personalizada), "main.py", personalizada);
             }
 
             var dirBase = AppContext.BaseDirectory;
 
-            // 1. Producción instalada: backend/backend.exe dentro de la carpeta instalada
-            var exeEnBackend = Path.Combine(dirBase, "backend", "backend.exe");
-            if (File.Exists(exeEnBackend))
-                return (exeEnBackend, "", Path.Combine(dirBase, "backend"));
+            // 1. Producción instalada: carpeta backend/ junto a Frontend.exe (con su propio runtime portable python/python.exe firmado)
+            var dirBackendInstalado = Path.Combine(dirBase, "backend");
+            if (File.Exists(Path.Combine(dirBackendInstalado, "main.py")))
+                return (BuscarPython(dirBackendInstalado), "main.py", dirBackendInstalado);
 
-            // 2. Producción instalada: backend.exe al lado de Frontend.exe
-            var exeAlLado = Path.Combine(dirBase, "backend.exe");
-            if (File.Exists(exeAlLado))
-                return (exeAlLado, "", dirBase);
-
-            // 3. Modo desarrollo: subir directorios buscando la carpeta backend
+            // 2. Modo desarrollo: subir directorios buscando la carpeta backend con main.py
             var dir = new DirectoryInfo(dirBase);
             while (dir != null)
             {
                 var candidata = Path.Combine(dir.FullName, "backend");
-                if (Directory.Exists(candidata))
+                if (Directory.Exists(candidata) && File.Exists(Path.Combine(candidata, "main.py")))
                 {
-                    // Buscar si fue compilado con PyInstaller en dist/backend/backend.exe
-                    var exeDist = Path.Combine(candidata, "dist", "backend", "backend.exe");
-                    if (File.Exists(exeDist))
-                        return (exeDist, "", Path.Combine(candidata, "dist", "backend"));
-
-                    if (File.Exists(Path.Combine(candidata, "main.py")))
-                        return (BuscarPython(candidata), "main.py", candidata);
+                    return (BuscarPython(candidata), "main.py", candidata);
                 }
                 dir = dir.Parent;
             }
@@ -135,6 +124,11 @@ namespace Frontend.Services
 
         private static string BuscarPython(string carpetaBackend)
         {
+            // 1. Runtime de Python portable incluido en el instalador (firmado digitalmente por Python Software Foundation)
+            var pythonPortable = Path.Combine(carpetaBackend, "python", "python.exe");
+            if (File.Exists(pythonPortable)) return pythonPortable;
+
+            // 2. Entorno virtual de desarrollo (venv / .venv)
             foreach (var venv in new[] { "venv", ".venv" })
             {
                 var exe = Path.Combine(carpetaBackend, venv, "Scripts", "python.exe");
