@@ -17,11 +17,11 @@
             <!-- Selector de subsecciones (Pestañas) -->
             <Border Background="#F1EAE1" CornerRadius="14" Padding="5" Margin="0,0,0,25" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal">
-                    <RadioButton Content="👥  Perfil del Grupo (Contexto)" GroupName="SubMenuConfig" 
-                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToBool}, ConverterParameter=0, Mode=TwoWay}"
-                                 Style="{StaticResource TabSegmento}" Margin="0,0,4,0"/>
-                    <RadioButton Content="🔑  API Key y Modelo Gemini" GroupName="SubMenuConfig" 
+                    <RadioButton Content="🔑  1. Llave de IA (API Key Gemini)" GroupName="SubMenuConfig" 
                                  IsChecked="{Binding SeccionActual, Converter={StaticResource EqToBool}, ConverterParameter=1, Mode=TwoWay}"
+                                 Style="{StaticResource TabSegmento}" Margin="0,0,4,0"/>
+                    <RadioButton Content="👥  2. Perfil del Grupo (Contexto)" GroupName="SubMenuConfig" 
+                                 IsChecked="{Binding SeccionActual, Converter={StaticResource EqToBool}, ConverterParameter=0, Mode=TwoWay}"
                                  Style="{StaticResource TabSegmento}" Margin="0"/>
                 </StackPanel>
             </Border>
@@ -215,35 +215,158 @@
             </StackPanel>
 
             <!-- ============================================================== -->
-            <!-- SUBSECCIÓN 1: API KEY Y MODELO GEMINI                          -->
+            <!-- SUBSECCIÓN 1: API KEY Y MODELO GEMINI (CON TUTORIAL PASO A PASO)-->
             <!-- ============================================================== -->
             <StackPanel Visibility="{Binding SeccionActual, Converter={StaticResource EqToVis}, ConverterParameter=1}">
 
-                <!-- Tarjeta Estado Actual de la API Key -->
+                <!-- Tarjeta Explicativa: ¿Qué es la API Key? -->
+                <Border Background="#FFFBEB" BorderBrush="#FCD34D" BorderThickness="1.5" CornerRadius="14" Padding="22,18" Margin="0,0,0,20">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="💡" FontSize="28" Margin="0,0,16,0" VerticalAlignment="Top"/>
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="¿Qué es la llave de IA (API Key) y por qué se configura una sola vez?"
+                                       FontSize="16" FontWeight="Bold" Foreground="#92400E" Margin="0,0,0,6"/>
+                            <TextBlock Text="Para que este programa pueda redactar tus planeaciones didácticas usando la Inteligencia Artificial de Google (Gemini), necesita una «llave digital personal» llamada API Key."
+                                       FontSize="13.5" Foreground="#78350F" TextWrapping="Wrap" Margin="0,0,0,8"/>
+                            <WrapPanel>
+                                <Border Background="#FEF3C7" CornerRadius="6" Padding="10,4" Margin="0,0,8,4">
+                                    <TextBlock Text="✓ 100% Gratuita para docentes" FontSize="12.5" FontWeight="Bold" Foreground="#92400E"/>
+                                </Border>
+                                <Border Background="#FEF3C7" CornerRadius="6" Padding="10,4" Margin="0,0,8,4">
+                                    <TextBlock Text="✓ No pide tarjeta bancaria" FontSize="12.5" FontWeight="Bold" Foreground="#92400E"/>
+                                </Border>
+                                <Border Background="#FEF3C7" CornerRadius="6" Padding="10,4" Margin="0,0,8,4">
+                                    <TextBlock Text="✓ Solo se hace 1 vez en tu computadora" FontSize="12.5" FontWeight="Bold" Foreground="#92400E"/>
+                                </Border>
+                            </WrapPanel>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Tarjeta Tutorial Paso a Paso -->
                 <Border Style="{StaticResource TarjetaFigma}">
                     <StackPanel>
-                        <TextBlock Text="ESTADO DE LA API KEY DE GEMINI" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,0,0,15"/>
+                        <TextBlock Text="🎓 TUTORIAL PASO A PASO: CÓMO OBTENER TU CLAVE GRATIS (TOMA 1 MINUTO)"
+                                   FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorPrimario}" Margin="0,0,0,18"/>
+
+                        <!-- Paso 1 -->
+                        <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1" CornerRadius="10" Padding="15,12" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource ColorPrimario}" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <TextBlock Text="1" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="0,0,12,0">
+                                    <TextBlock Text="Abre la página oficial de Google AI Studio" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B"/>
+                                    <TextBlock Text="Haz clic en el botón azul de la derecha. Se abrirá tu navegador de internet e iniciarás sesión con tu cuenta normal de Gmail."
+                                               FontSize="13" Foreground="#475569" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                </StackPanel>
+                                <Button Grid.Column="2" Content="🌐 1. Abrir Google AI Studio ↗" Command="{Binding AbrirAiStudioCommand}"
+                                        Style="{StaticResource BotonGoogleDocs}" Padding="18,10" FontSize="13.5" VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Paso 2 -->
+                        <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1" CornerRadius="10" Padding="15,12" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource ColorPrimario}" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <TextBlock Text="2" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Haz clic en el botón «Create API key» (o «Crear clave de API»)" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B"/>
+                                    <TextBlock Text="En la página que se abrió, busca el botón azul arriba a la derecha que dice «Create API key». Si aparece una ventana preguntando dónde crearla, elige la primera opción («Create API key in new project»)."
+                                               FontSize="13" Foreground="#475569" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Paso 3 -->
+                        <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1" CornerRadius="10" Padding="15,12" Margin="0,0,0,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="{StaticResource ColorPrimario}" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <TextBlock Text="3" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Copia el código generado (empieza con las letras AIza...)" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B"/>
+                                    <TextBlock Text="Te aparecerá una clave larga con letras y números. Haz clic en el botón «Copy» (Copiar) que viene ahí mismo para guardarla en tu portapapeles."
+                                               FontSize="13" Foreground="#475569" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- Paso 4 -->
+                        <Border Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1.2" CornerRadius="10" Padding="15,12">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Border Grid.Column="0" Width="32" Height="32" CornerRadius="16" Background="#16A34A" VerticalAlignment="Center" Margin="0,0,14,0">
+                                    <TextBlock Text="4" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="Pega tu clave aquí abajo y presiona «Guardar y Activar mi Clave ✓»" FontSize="14.5" FontWeight="Bold" Foreground="#166534"/>
+                                    <TextBlock Text="Usa el botón «📋 Pegar clave copiada» de aquí abajo para no tener que usar el teclado, y luego haz clic en «Guardar y Activar mi Clave ✓»."
+                                               FontSize="13" Foreground="#15803D" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Tarjeta Estado Actual e Ingreso de la API Key -->
+                <Border Style="{StaticResource TarjetaFigma}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,15">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="ACTIVAR O MODIFICAR TU API KEY DE GEMINI" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}" VerticalAlignment="Center"/>
+                            <Button Grid.Column="1" Content="Continuar a Perfil del Grupo →" Command="{Binding IrAPerfilGrupoCommand}"
+                                    Visibility="{Binding ApiKeyConfigurada, Converter={StaticResource BoolToVis}}"
+                                    Background="#F0FDF4" BorderBrush="#86EFAC" BorderThickness="1" Foreground="#15803D" FontWeight="Bold" FontSize="12.5" Padding="14,6" Cursor="Hand"/>
+                        </Grid>
                         
                         <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="8" Padding="15" Margin="0,0,0,15">
                             <StackPanel>
                                 <TextBlock Text="{Binding EstadoApiKeyTexto}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource ColorTextoPrincipal}"/>
-                                <TextBlock Text="Tu clave se almacena de forma segura y cifrada en tu equipo local con Windows DPAPI (o a través del archivo de entorno)."
+                                <TextBlock Text="Tu clave se almacena de forma segura y cifrada en tu equipo local con Windows DPAPI. Nadie más tiene acceso a ella."
                                            FontSize="12" Foreground="{StaticResource ColorTextoSecundario}" Margin="0,4,0,0"/>
                             </StackPanel>
                         </Border>
 
-                        <TextBlock Text="Ingresar o Modificar API Key" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
+                        <TextBlock Text="Pega aquí tu API Key de Google Gemini:" FontWeight="Bold" FontSize="14" Foreground="{StaticResource ColorTextoPrincipal}" Margin="0,0,0,8"/>
                         <Grid Margin="0,0,0,15">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="15"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding ApiKeyInput, UpdateSourceTrigger=PropertyChanged}" Tag="Pega aquí tu clave: AIzaSy..." Margin="0"/>
-                            <Button Grid.Column="2" Content="Probar Conexión" Command="{Binding ProbarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="15,0" Height="45"/>
-                            <Button Grid.Column="4" Content="Guardar Clave" Command="{Binding GuardarApiKeyCommand}" Style="{StaticResource BotonNaranja}" Padding="20,0" Height="45"/>
+                            <Button Grid.Column="2" Content="📋 Pegar clave copiada" Command="{Binding PegarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="14,0" Height="45" ToolTip="Pega automáticamente el texto que copiaste de Google AI Studio"/>
+                            <Button Grid.Column="4" Content="Probar" Command="{Binding ProbarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="14,0" Height="45"/>
+                            <Button Grid.Column="6" Content="Guardar y Activar mi Clave ✓" Command="{Binding GuardarApiKeyCommand}" Style="{StaticResource BotonNaranja}" Padding="20,0" Height="45"/>
                         </Grid>
 
                         <!-- Mensaje de prueba de la API Key -->
@@ -263,7 +386,7 @@
                                     </Style.Triggers>
                                 </Style>
                             </Border.Style>
-                            <TextBlock Text="{Binding ResultadoPrueba.Mensaje}" FontSize="13" FontWeight="SemiBold">
+                            <TextBlock Text="{Binding ResultadoPrueba.Mensaje}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="Foreground" Value="#B91C1C"/>
@@ -277,8 +400,8 @@
                             </TextBlock>
                         </Border>
 
-                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
-                            <Button Content="Obtener API Key Gratis en Google AI Studio ↗" Command="{Binding AbrirAiStudioCommand}"
+                        <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                            <Button Content="🌐 Volver a abrir Google AI Studio ↗" Command="{Binding AbrirAiStudioCommand}"
                                     Background="Transparent" BorderThickness="0" Foreground="#2563EB" FontWeight="Bold" Cursor="Hand" Margin="0,0,25,0"/>
                             <Button Content="Eliminar Clave Guardada" Command="{Binding EliminarApiKeyCommand}"
                                     Background="Transparent" BorderThickness="0" Foreground="#DC2626" Cursor="Hand"

@@ -37,7 +37,7 @@ def _traducir_error(e: Exception) -> ErrorIA:
         if codigo in (401, 403) or "api key" in texto or "api_key" in texto:
             return ErrorIA("La API key no es válida o no tiene permisos. Revísala en Configuración → API de Gemini.", 401)
         if codigo == 429 or "quota" in texto or "resource_exhausted" in texto:
-            return ErrorIA("Se alcanzó el límite de uso de tu API key. Espera unos minutos o revisa tu cuota en Google AI Studio.", 429)
+            return ErrorIA("Tu llave gratuita de Google Gemini alcanzó su límite de tokens (por minuto o por día). Espera un minuto, cambia al modelo ligero (Flash-Lite) o revisa tu cuota en Google AI Studio.", 429)
         if codigo == 404:
             return ErrorIA("El modelo seleccionado no está disponible para tu API key. Elige otro en Configuración.", 400)
         if codigo == 400:

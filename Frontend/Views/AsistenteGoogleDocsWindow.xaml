@@ -1,0 +1,67 @@
+<Window x:Class="Frontend.Views.AsistenteGoogleDocsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Asistente Automático de Google Docs"
+        Width="430" SizeToContent="Height"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        Topmost="True"
+        ShowActivated="False"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False">
+
+    <Border Background="#FFFFFF" BorderBrush="#C25A38" BorderThickness="2" CornerRadius="16" Margin="14" Padding="22,18">
+        <Border.Effect>
+            <DropShadowEffect BlurRadius="22" ShadowDepth="4" Direction="270" Color="#1E293B" Opacity="0.35"/>
+        </Border.Effect>
+
+        <StackPanel>
+            <!-- Encabezado -->
+            <Grid Margin="0,0,0,10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" x:Name="TxtIconoEstado" Text="⏳" FontSize="24" VerticalAlignment="Center" Margin="0,0,10,0"/>
+                <TextBlock Grid.Column="1" x:Name="TxtTituloEstado"
+                           Text="Conectando con Google Docs..."
+                           FontSize="15.5" FontWeight="Bold" Foreground="#1E293B" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                <Button Grid.Column="2" Content="✕" Click="BtnCerrar_Click"
+                        Background="Transparent" BorderThickness="0" Foreground="#64748B" FontWeight="Bold" FontSize="15" Cursor="Hand" Padding="6,2" ToolTip="Cerrar asistente"/>
+            </Grid>
+
+            <!-- Barra de progreso mientras detecta que cargó Google Docs -->
+            <ProgressBar x:Name="BarraProgreso" IsIndeterminate="True" Height="7" Foreground="#C25A38" Background="#F1EAE1" BorderThickness="0" Margin="0,0,0,12"/>
+
+            <!-- Mensaje descriptivo -->
+            <Border x:Name="CajaMensaje" Background="#FFFBEB" BorderBrush="#FDE68A" BorderThickness="1" CornerRadius="10" Padding="12,10" Margin="0,0,0,14">
+                <TextBlock x:Name="TxtDetalleEstado"
+                           Text="Estamos esperando a que termine de abrirse la hoja de Google Docs en tu navegador para pegar tu planeación automáticamente sin que tengas que usar el teclado..."
+                           FontSize="13" Foreground="#78350F" TextWrapping="Wrap" LineHeight="18"/>
+            </Border>
+
+            <!-- Botón de 1 clic para pegar sin usar Ctrl+V -->
+            <Button x:Name="BtnPegarManual" Click="BtnPegarManual_Click"
+                    Style="{StaticResource BotonNaranja}"
+                    Padding="16,12" Margin="0,0,0,8" HorizontalAlignment="Stretch">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="📋 " FontSize="15" VerticalAlignment="Center"/>
+                    <TextBlock x:Name="TxtBotonPegar" Text="Insertar mi Planeación Aquí (1 clic)" FontSize="14" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Button>
+
+            <Grid Margin="0,4,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Content="📄 Prefiero descargarla en Word" Click="BtnWord_Click"
+                        Background="Transparent" BorderThickness="0" Foreground="#2563EB" FontWeight="SemiBold" FontSize="12.5" Cursor="Hand" HorizontalAlignment="Left"/>
+                <Button Grid.Column="1" Content="Ya se pegó, cerrar ✓" Click="BtnCerrar_Click"
+                        Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" Foreground="#334155" FontWeight="SemiBold" FontSize="12" Padding="12,5" Cursor="Hand"/>
+            </Grid>
+        </StackPanel>
+    </Border>
+</Window>

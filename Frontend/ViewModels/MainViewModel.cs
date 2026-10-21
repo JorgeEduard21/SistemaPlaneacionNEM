@@ -4,12 +4,14 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using Frontend.Models;
 using Frontend.Services;
+using Frontend.Views;
 
 namespace Frontend.ViewModels
 {
@@ -17,6 +19,8 @@ namespace Frontend.ViewModels
     {
         private readonly ApiClient _api;
         private readonly BackendManager _backendManager;
+
+        public event EventHandler? PlaneacionGeneradaExitosamente;
 
         public ConfiguracionViewModel ConfiguracionVM { get; }
 
@@ -86,6 +90,20 @@ namespace Frontend.ViewModels
         {
             get => _generandoPlaneacion;
             set { SetProperty(ref _generandoPlaneacion, value); }
+        }
+
+        private string _etapaGeneracionTexto = "Analizando el contexto de tu grupo y los PDA seleccionados...";
+        public string EtapaGeneracionTexto
+        {
+            get => _etapaGeneracionTexto;
+            set { SetProperty(ref _etapaGeneracionTexto, value); }
+        }
+
+        private string _tiempoTranscurridoGeneracionTexto = "Tiempo transcurrido: 0 s  ·  Espera estimada: 20 a 45 segundos";
+        public string TiempoTranscurridoGeneracionTexto
+        {
+            get => _tiempoTranscurridoGeneracionTexto;
+            set { SetProperty(ref _tiempoTranscurridoGeneracionTexto, value); }
         }
 
         private string _estadoApiKeyBanner = "";
@@ -389,6 +407,8 @@ namespace Frontend.ViewModels
         public ICommand IrAPasoCommand { get; }
         public ICommand IrAVistaWizardCommand { get; }
         public ICommand IrAVistaConfiguracionCommand { get; }
+        public ICommand IrAConfiguracionApiCommand { get; }
+        public ICommand IrAConfiguracionPerfilCommand { get; }
         public ICommand IrAVistaHistorialCommand { get; }
         public ICommand GenerarPlaneacionCommand { get; }
         public ICommand DescargarWordCommand { get; }
@@ -452,6 +472,8 @@ namespace Frontend.ViewModels
             // Comandos de Navegación de Vistas
             IrAVistaWizardCommand = new RelayCommand(_ => VistaActual = 0);
             IrAVistaConfiguracionCommand = new RelayCommand(_ => { VistaActual = 1; _ = ConfiguracionVM.CargarAsync(); });
+            IrAConfiguracionApiCommand = new RelayCommand(_ => { VistaActual = 1; ConfiguracionVM.SeccionActual = 1; _ = ConfiguracionVM.CargarAsync(); });
+            IrAConfiguracionPerfilCommand = new RelayCommand(_ => { VistaActual = 1; ConfiguracionVM.SeccionActual = 0; _ = ConfiguracionVM.CargarAsync(); });
             IrAVistaHistorialCommand = new RelayCommand(_ => { VistaActual = 2; _ = CargarHistorialAsync(); });
 
             // Comandos del Catálogo NEM
@@ -473,8 +495,92 @@ namespace Frontend.ViewModels
 
             CerrarNotificacionCommand = new RelayCommand(_ => MensajeNotificacion = null);
 
+            // Detección instantánea en disco antes de arrancar el backend para redireccionar sin ninguna demora
+            DetectarVistaInicialRapida();
+
             // Inicializar Backend y Cargar Configuración en segundo plano
             _ = InicializarAplicacionAsync();
+        }
+
+        private void DetectarVistaInicialRapida()
+        {
+            try
+            {
+                var baseDir = Environment.GetEnvironmentVariable("PLANEACION_NEM_DATA");
+                if (string.IsNullOrWhiteSpace(baseDir))
+                {
+                    baseDir = Path.Combine(
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                        "SistemaPlaneacionNEM");
+                }
+
+                bool tieneApiKey = false;
+                var rutaConfig = Path.Combine(baseDir, "config.json");
+                if (File.Exists(rutaConfig))
+                {
+                    var jsonConfig = File.ReadAllText(rutaConfig);
+                    using var doc = JsonDocument.Parse(jsonConfig);
+                    if (doc.RootElement.TryGetProperty("api_key", out var propKey) &&
+                        propKey.ValueKind == JsonValueKind.String &&
+                        !string.IsNullOrWhiteSpace(propKey.GetString()))
+                    {
+                        tieneApiKey = true;
+                    }
+                }
+
+                if (!tieneApiKey)
+                {
+                    foreach (var envName in new[] { "GEMINI_API_KEY", "GOOGLE_API_KEY", "API_KEY" })
+                    {
+                        if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(envName)))
+                        {
+                            tieneApiKey = true;
+                            break;
+                        }
+                    }
+                }
+
+                bool tienePerfilCompleto = false;
+                var rutaPerfil = Path.Combine(baseDir, "perfil.json");
+                if (File.Exists(rutaPerfil))
+                {
+                    var jsonPerfil = File.ReadAllText(rutaPerfil);
+                    var perfil = JsonSerializer.Deserialize<PerfilGrupo>(jsonPerfil, new JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    });
+                    if (perfil != null && perfil.EstaCompleto)
+                    {
+                        tienePerfilCompleto = true;
+                    }
+                }
+
+                if (!tieneApiKey)
+                {
+                    _vistaActual = 1; // Pestaña Configuración inmediata
+                    ConfiguracionVM.SeccionActual = 1; // 1 = Tutorial y API Key de Gemini
+                    MostrarAlertaApiKey = true;
+                    EstadoApiKeyBanner = "API Key: No configurada";
+                    Notificar("👋 ¡Bienvenido! Paso 1 (solo la primera vez): Sigue el tutorial en pantalla para activar tu llave gratuita de Google Gemini.");
+                }
+                else if (!tienePerfilCompleto)
+                {
+                    _vistaActual = 1; // Pestaña Configuración inmediata
+                    ConfiguracionVM.SeccionActual = 0; // 0 = Contexto del Grupo
+                    MostrarAlertaPerfil = true;
+                    EstadoApiKeyBanner = "API Key: Conectada";
+                    Notificar("👋 ¡Bienvenido! Completa el contexto de tu grupo (grados, número de alumnos y entorno) y dale en 'Guardar Perfil' para comenzar.");
+                }
+                else
+                {
+                    _vistaActual = 0;
+                    EstadoApiKeyBanner = "Iniciando servicio local...";
+                }
+            }
+            catch
+            {
+                // Si ocurre algún error leyendo archivos locales, InicializarAplicacionAsync tomará el control
+            }
         }
 
         private async Task InicializarAplicacionAsync()
@@ -484,20 +590,27 @@ namespace Frontend.ViewModels
                 await _backendManager.IniciarAsync();
                 BackendConectado = true;
                 await ConfiguracionVM.CargarAsync();
-                await CargarCatalogoAsync();
-                await CargarHistorialAsync();
                 NotificarCambiosPerfil();
 
-                if (!ConfiguracionVM.PerfilGuardado.EstaCompleto)
+                // Redirección prioritaria inmediata: 1° API Key -> 2° Perfil del Grupo -> 3° Asistente
+                if (!ConfiguracionVM.ApiKeyConfigurada)
                 {
                     VistaActual = 1; // Pestaña de Configuración
-                    ConfiguracionVM.SeccionActual = 0; // Pestaña de Contexto del Grupo
-                    Notificar("¡Bienvenido! Por favor completa el contexto de tu grupo (grados, número de alumnos y entorno) una sola vez para comenzar.");
+                    ConfiguracionVM.SeccionActual = 1; // Subsección API Key con Tutorial
+                    Notificar("👋 ¡Bienvenido! Paso 1 (solo se hace una vez): Sigue el tutorial de aquí abajo para obtener y guardar tu llave gratuita de Google Gemini.");
+                }
+                else if (!ConfiguracionVM.PerfilGuardado.EstaCompleto)
+                {
+                    VistaActual = 1; // Pestaña de Configuración
+                    ConfiguracionVM.SeccionActual = 0; // Subsección Contexto del Grupo
+                    Notificar("👋 ¡Bienvenido! Por favor completa el contexto de tu grupo (grados, número de alumnos y entorno) y haz clic en 'Guardar Perfil' para comenzar.");
                 }
                 else
                 {
                     Notificar("Sistema listo y catálogo NEM cargado.");
                 }
+
+                await Task.WhenAll(CargarCatalogoAsync(), CargarHistorialAsync());
             }
             catch (Exception ex)
             {
@@ -699,7 +812,7 @@ namespace Frontend.ViewModels
         {
             if (ConfiguracionVM.Estado?.ApiKeyConfigurada != true)
             {
-                Notificar("No has configurado tu API key de Gemini. Ve al menú de Configuración para agregarla.", esError: true);
+                Notificar("No has configurado tu API key de Gemini. Sigue el tutorial en pantalla para activarla.", esError: true);
                 VistaActual = 1;
                 ConfiguracionVM.SeccionActual = 1;
                 return;
@@ -728,7 +841,12 @@ namespace Frontend.ViewModels
             }
 
             GenerandoPlaneacion = true;
-            Notificar("Generando planeación didáctica con Gemini... Esto puede tomar unos segundos.");
+            EtapaGeneracionTexto = "Analizando el contexto de tu grupo y los PDA seleccionados...";
+            TiempoTranscurridoGeneracionTexto = "Tiempo transcurrido: 0 s  ·  Tiempo estimado: 20 a 45 segundos";
+            Notificar("⏳ Generando planeación didáctica con Gemini... Tiempo estimado de espera: 20 a 45 segundos.");
+
+            using var timerCts = new CancellationTokenSource();
+            var timerTask = ActualizarRelojGeneracionAsync(timerCts.Token);
 
             try
             {
@@ -768,18 +886,165 @@ namespace Frontend.ViewModels
 
                 using var cts = new CancellationTokenSource(TimeSpan.FromMinutes(4));
                 var resultado = await _api.GenerarPlaneacionAsync(solicitud, cts.Token);
+
+                timerCts.Cancel();
+                GenerandoPlaneacion = false;
+
                 PlaneacionActual = resultado;
                 _ = CargarHistorialAsync();
                 PasoActual = 3;
-                Notificar("¡Planeación didáctica generada exitosamente!");
+                Notificar("⬇️ ¡Planeación didáctica generada exitosamente! Baja en esta pantalla para revisarla o abrirla en Google Docs / Word.");
+
+                PlaneacionGeneradaExitosamente?.Invoke(this, EventArgs.Empty);
+
+                MessageBox.Show(
+                    "¡Tu planeación didáctica se ha generado exitosamente! 🎉\n\n" +
+                    "⬇️ Recuerda bajar en esta pantalla (desplazarte hacia abajo) para revisar tu planeación completa y usar los botones para abrirla en Google Docs o descargarla en Word.",
+                    "¡Planeación Lista!",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
-                Notificar($"Error al generar planeación: {ex.Message}", esError: true);
+                timerCts.Cancel();
+                GenerandoPlaneacion = false;
+                await ManejarErrorGeneracionAsync(ex);
             }
             finally
             {
+                timerCts.Cancel();
                 GenerandoPlaneacion = false;
+                try { await timerTask; } catch { }
+            }
+        }
+
+        private async Task ManejarErrorGeneracionAsync(Exception ex)
+        {
+            var apiEx = ex as ApiException;
+            int status = apiEx?.StatusCode ?? 0;
+            string msgLower = (ex.Message ?? "").ToLowerInvariant();
+
+            string modeloIdActual = ConfiguracionVM.Estado?.Modelo ?? "gemini-3.8-flash";
+            string nombreApi = modeloIdActual switch
+            {
+                "gemini-3.5-flash-lite" => "Google Gemini (3.5 Flash-Lite)",
+                "gemini-3.1-pro-preview" => "Google Gemini (3.1 Pro)",
+                "gemini-3.8-flash" => "Google Gemini (3.8 Flash)",
+                _ => "Google Gemini"
+            };
+
+            // 1. Límite de tokens / cuota agotada (429 RESOURCE_EXHAUSTED)
+            if (status == 429 || msgLower.Contains("límite") || msgLower.Contains("cuota") || msgLower.Contains("quota") || msgLower.Contains("tokens"))
+            {
+                Notificar($"Tu llave gratuita de {nombreApi} alcanzó su límite de tokens (por minuto o por día).", esError: true);
+
+                if (modeloIdActual != "gemini-3.5-flash-lite")
+                {
+                    var respuesta = MessageBox.Show(
+                        $"Tu llave gratuita de {nombreApi} alcanzó su límite de tokens (por minuto o por día).\n\n" +
+                        "En Google Gemini cada modelo cuenta con su propio límite gratuito. El modelo ligero «Gemini 3.5 Flash-Lite» consume menos tokens y tiene disponibilidad adicional.\n\n" +
+                        "¿Deseas cambiar automáticamente al modelo ligero (Gemini 3.5 Flash-Lite) para generar tu planeación ahorita mismo sin esperar?\n\n" +
+                        "• Sí: Cambiar al modelo ligero y generar mi planeación ahora.\n" +
+                        "• No: Esperar un minuto o cambiar de llave en Configuración.",
+                        "🔋 Límite de Tokens Gratuitos de Google Gemini",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (respuesta == MessageBoxResult.Yes)
+                    {
+                        bool cambiado = await ConfiguracionVM.CambiarModeloDirectoAsync("gemini-3.5-flash-lite");
+                        if (cambiado)
+                        {
+                            await GenerarPlaneacionAsync();
+                            return;
+                        }
+                    }
+                }
+                else
+                {
+                    var respuesta = MessageBox.Show(
+                        $"Tu llave gratuita de {nombreApi} alcanzó su límite de tokens (por minuto o por día).\n\n" +
+                        "Tus datos de planeación siguen guardados en pantalla. Para continuar puedes:\n" +
+                        "1. Esperar 1 minuto y volver a hacer clic en «Generar Planeación» (si fue límite por minuto).\n" +
+                        "2. O bien, colocar otra llave gratuita de Google AI Studio en la pestaña de Configuración.\n\n" +
+                        "¿Deseas abrir la pestaña de la Llave de IA (API Key) para revisar o cambiar tu llave?",
+                        "🔋 Límite de Tokens Gratuitos de Google Gemini",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (respuesta == MessageBoxResult.Yes)
+                    {
+                        VistaActual = 1;
+                        ConfiguracionVM.SeccionActual = 1;
+                    }
+                }
+                return;
+            }
+
+            // 2. Llave inválida, revocada o sin permisos (401 / 403)
+            if (status == 401 || status == 403 || msgLower.Contains("api key no es válida") || msgLower.Contains("permisos"))
+            {
+                Notificar("La llave de Google Gemini no es válida o fue desactivada. Revísala en Configuración.", esError: true);
+                MessageBox.Show(
+                    $"Tu llave gratuita de {nombreApi} no pudo validarse (puede haberse copiado incompleta o haber sido eliminada en tu cuenta de Google).\n\n" +
+                    "Todos los datos que escribiste para tu planeación siguen guardados. Te llevaremos a la pestaña de la Llave de IA para que puedas pegarla de nuevo.",
+                    "🔑 Revisión de Llave de Google Gemini",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Warning);
+                VistaActual = 1;
+                ConfiguracionVM.SeccionActual = 1;
+                return;
+            }
+
+            // 3. Problemas de conexión a internet o saturación de servidores de Google (503 / 504 / 408)
+            if (status == 503 || status == 504 || status == 408 || msgLower.Contains("internet") || msgLower.Contains("tardó demasiado"))
+            {
+                Notificar($"Demora o desconexión temporal al comunicar con {nombreApi}.", esError: true);
+                MessageBox.Show(
+                    $"La conexión a internet o el servidor de {nombreApi} tardó demasiado en responder.\n\n" +
+                    "No te preocupes: todos los datos que seleccionaste para tu planeación siguen intactos en pantalla. Verifica tu conexión a internet y vuelve a hacer clic en «¡Generar Planeación con Gemini! 🚀».",
+                    "🌐 Conexión Temporal con Google Gemini",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information);
+                return;
+            }
+
+            // 4. Otros avisos devueltos por la API
+            Notificar($"Aviso de {nombreApi}: {ex.Message}", esError: true);
+            MessageBox.Show(
+                $"El servicio de {nombreApi} reportó lo siguiente:\n\n" +
+                $"«{ex.Message}»\n\n" +
+                "Tus datos de planeación siguen guardados en pantalla para que puedas intentarlo de nuevo.",
+                $"ℹ️ Aviso de {nombreApi}",
+                MessageBoxButton.OK,
+                MessageBoxImage.Information);
+        }
+
+        private async Task ActualizarRelojGeneracionAsync(CancellationToken token)
+        {
+            var inicio = DateTime.UtcNow;
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Task.Delay(1000, token);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+
+                int seg = (int)(DateTime.UtcNow - inicio).TotalSeconds;
+                TiempoTranscurridoGeneracionTexto = $"Tiempo transcurrido: {seg} s  ·  Tiempo estimado total: 20 a 45 segundos";
+
+                if (seg < 7)
+                    EtapaGeneracionTexto = "Analizando el contexto de tu grupo y los PDA seleccionados...";
+                else if (seg < 18)
+                    EtapaGeneracionTexto = $"Diseñando las sesiones con la metodología {Metodologia}...";
+                else if (seg < 28)
+                    EtapaGeneracionTexto = $"Estructurando las tablas, actividades y el instrumento ({Instrumento})...";
+                else
+                    EtapaGeneracionTexto = "Afinando los últimos detalles y el formato de tu planeación, ya casi termina...";
             }
         }
 
@@ -823,7 +1088,8 @@ namespace Frontend.ViewModels
             {
                 ExportadorGoogleDocs.CopiarConFormatoParaGoogleDocs(planeacion);
                 Process.Start(new ProcessStartInfo("https://docs.new") { UseShellExecute = true });
-                Notificar("¡Planeación copiada con formato (tablas, títulos y listas)! En la pestaña de Google Docs que se abrió, solo presiona Ctrl + V para pegarla.");
+                AsistenteGoogleDocsWindow.MostrarEInsertar(planeacion, () => DescargarWordDePlaneacionAsync(planeacion.Id));
+                Notificar("Abriendo Google Docs e insertando tu planeación automáticamente... Si tu internet tarda en cargar, usa el botón naranja de la esquina superior derecha.");
             }
             catch (Exception ex)
             {

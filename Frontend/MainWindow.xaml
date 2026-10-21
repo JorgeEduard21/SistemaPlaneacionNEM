@@ -136,7 +136,7 @@
                     <TextBlock Grid.Column="0" Text="⚠️" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="1" Text="No has configurado tu API Key de Gemini. Necesitas agregarla una vez en Configuración para poder generar planeaciones."
                                FontSize="13" Foreground="#991B1B" VerticalAlignment="Center"/>
-                    <Button Grid.Column="2" Content="Configurar API Key →" Command="{Binding IrAVistaConfiguracionCommand}"
+                    <Button Grid.Column="2" Content="Configurar API Key →" Command="{Binding IrAConfiguracionApiCommand}"
                             Background="Transparent" BorderThickness="0" Foreground="#DC2626" FontWeight="Bold" Cursor="Hand"/>
                 </Grid>
             </Border>
@@ -153,7 +153,7 @@
                     <TextBlock Grid.Column="0" Text="📌" FontSize="16" Margin="0,0,10,0" VerticalAlignment="Center"/>
                     <TextBlock Grid.Column="1" Text="Configura el contexto de tu grupo (grados, número de alumnos, entorno). Se guardará para que no tengas que escribirlo cada vez."
                                FontSize="13" Foreground="#92400E" VerticalAlignment="Center"/>
-                    <Button Grid.Column="2" Content="Guardar Perfil →" Command="{Binding IrAVistaConfiguracionCommand}"
+                    <Button Grid.Column="2" Content="Guardar Perfil →" Command="{Binding IrAConfiguracionPerfilCommand}"
                             Background="Transparent" BorderThickness="0" Foreground="#D97706" FontWeight="Bold" Cursor="Hand"/>
                 </Grid>
             </Border>
@@ -697,7 +697,7 @@
                                                     <TextBlock Text="CONTENIDOS DEL PROGRAMA SINTÉTICO NEM 2022 (PRECARGADOS)" FontSize="14" FontWeight="Bold" Foreground="{StaticResource ColorTextoSecundario}"/>
                                                     <TextBlock Text="{Binding GradosActivosCatalogoTexto}" FontSize="12" Foreground="#4E7D6E" FontWeight="SemiBold" Margin="0,4,0,0"/>
                                                 </StackPanel>
-                                                <Button Grid.Column="1" Content="Cambiar grados ⚙️" Command="{Binding IrAVistaConfiguracionCommand}"
+                                                <Button Grid.Column="1" Content="Cambiar grados ⚙️" Command="{Binding IrAConfiguracionPerfilCommand}"
                                                         Background="#FFF2EB" BorderBrush="#E5D8C5" BorderThickness="1" Foreground="{StaticResource ColorPrimario}"
                                                         FontWeight="SemiBold" FontSize="12" Padding="12,6" Cursor="Hand" VerticalAlignment="Center"/>
                                             </Grid>
@@ -1184,7 +1184,7 @@
                     <!-- ===================================================== -->
                     <TabItem>
                         <Grid>
-                            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,20,0">
+                            <ScrollViewer x:Name="ScrollPaso3" VerticalScrollBarVisibility="Auto" Padding="0,0,20,0">
                                 <StackPanel MaxWidth="920">
                                     <TextBlock Text="🚀 Generación y Exportación (Word y Google Docs)" FontSize="30" FontWeight="Bold" Foreground="#1E1E1E" Margin="0,0,0,8" FontFamily="Georgia"/>
                                     <TextBlock Text="Revisa el resumen de tu planeación, genérala con Gemini y ábrela en Google Docs o Word." FontSize="15" Foreground="#5C5C5C" Margin="0,0,0,25"/>
@@ -1262,7 +1262,7 @@
                                             </StackPanel>
 
                                             <!-- Botón Modificar Contexto -->
-                                            <Button Grid.Column="1" Content="Modificar Contexto ✏️" Command="{Binding IrAVistaConfiguracionCommand}"
+                                            <Button Grid.Column="1" Content="Modificar Contexto ✏️" Command="{Binding IrAConfiguracionPerfilCommand}"
                                                     ToolTip="Edita los grados, número de alumnos o entorno en tu perfil guardado"
                                                     Background="White" BorderBrush="#E5D8C5" BorderThickness="1.5" Padding="16,10" Foreground="{StaticResource ColorPrimario}" FontWeight="Bold" Cursor="Hand" VerticalAlignment="Center"/>
                                         </Grid>
@@ -1284,17 +1284,33 @@
                                     </Border>
 
                                     <!-- Resultado Generado y Opciones de Exportación (Word + Google Docs) -->
-                                    <StackPanel Visibility="{Binding TienePlaneacionGenerada, Converter={StaticResource BoolToVis}}" Margin="0,10,0,30">
+                                    <StackPanel x:Name="SeccionResultadoPlaneacion" Visibility="{Binding TienePlaneacionGenerada, Converter={StaticResource BoolToVis}}" Margin="0,10,0,30">
+                                        <!-- Banner Recordatorio de Desplazamiento hacia Abajo -->
+                                        <Border Background="#ECFDF5" BorderBrush="#6EE7B7" BorderThickness="1.5" CornerRadius="12" Padding="18,14" Margin="0,0,0,16">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                    <ColumnDefinition Width="*"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="⬇️" FontSize="24" VerticalAlignment="Center" Margin="0,0,14,0"/>
+                                                <StackPanel Grid.Column="1">
+                                                    <TextBlock Text="¡Tu planeación didáctica está lista aquí abajo!" FontSize="15" FontWeight="Bold" Foreground="#065F46"/>
+                                                    <TextBlock Text="Desplázate hacia abajo con la rueda del ratón o la barra lateral para leer toda la secuencia didáctica, o usa los botones de abajo para abrirla directamente en Google Docs o Word."
+                                                               FontSize="13" Foreground="#047857" TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                                </StackPanel>
+                                            </Grid>
+                                        </Border>
+
                                         <Border Style="{StaticResource TarjetaFigma}" Background="#FFFDF9" BorderBrush="#D4A373" Padding="22,18" Margin="0,0,0,18">
                                             <StackPanel>
                                                 <TextBlock Text="{Binding PlaneacionActual.Titulo}" FontSize="21" FontWeight="Bold" Foreground="#1E1E1E" TextWrapping="Wrap" Margin="0,0,0,6"/>
                                                 <TextBlock Text="Elige cómo deseas trabajar o exportar tu planeación didáctica:" FontSize="13" Foreground="#64748B" Margin="0,0,0,14"/>
 
                                                 <WrapPanel>
-                                                    <Button Content="🌐 Abrir en Google Docs (sin licencia de Office)" 
+                                                    <Button Content="🌐 Abrir e Insertar en Google Docs (Automático)" 
                                                             Command="{Binding AbrirEnGoogleDocsCommand}" 
                                                             Style="{StaticResource BotonGoogleDocs}" 
-                                                            ToolTip="Copia la planeación con formato completo (tablas, colores y títulos) y abre un documento nuevo de Google Docs listo para pegar con Ctrl+V"
+                                                            ToolTip="Abre Google Docs e inserta automáticamente tu planeación con tablas y colores (sin necesidad de usar el teclado)"
                                                             Padding="20,12" Margin="0,0,12,8"/>
 
                                                     <Button Content="📄 Descargar en Word (.docx)" 
@@ -1311,7 +1327,7 @@
                                                 </WrapPanel>
 
                                                 <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="12,8" Margin="0,6,0,0">
-                                                    <TextBlock Text="💡 Tip para Google Docs: Al hacer clic en «Abrir en Google Docs», tu planeación ya va copiada con tablas, colores y encabezados. Cuando se abra la página en tu navegador, solo presiona Ctrl + V."
+                                                    <TextBlock Text="✨ Pegado Automático en Google Docs: Al hacer clic en «Abrir e Insertar en Google Docs», el sistema abrirá una hoja nueva y escribirá tu planeación sola en cuanto cargue la página (además aparecerá un botón naranja flotante en la esquina por si tu internet tarda y deseas insertarla con 1 clic)."
                                                                FontSize="12.5" Foreground="#1E40AF" TextWrapping="Wrap"/>
                                                 </Border>
                                             </StackPanel>
@@ -1348,6 +1364,54 @@
             <!-- ============================================================= -->
             <Grid Visibility="{Binding EsVistaHistorial, Converter={StaticResource BoolToVis}}">
                 <views:HistorialView/>
+            </Grid>
+
+            <!-- ============================================================= -->
+            <!-- MODAL CENTRADO DE CARGA DURANTE LA GENERACIÓN DE PLANEACIÓN   -->
+            <!-- ============================================================= -->
+            <Grid Visibility="{Binding GenerandoPlaneacion, Converter={StaticResource BoolToVis}}"
+                  Background="#A61E293B" Panel.ZIndex="100">
+                <Border Background="#FFFDF9" BorderBrush="#D4A373" BorderThickness="2" CornerRadius="18"
+                        Padding="36,30" MaxWidth="540" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <Border.Effect>
+                        <DropShadowEffect Color="#000000" BlurRadius="35" ShadowDepth="8" Opacity="0.35"/>
+                    </Border.Effect>
+                    <StackPanel HorizontalAlignment="Center">
+                        <!-- Icono superior -->
+                        <Border Background="#FFF2EB" BorderBrush="#F5D0BA" BorderThickness="1.5" CornerRadius="40"
+                                Width="68" Height="68" HorizontalAlignment="Center" Margin="0,0,0,16">
+                            <TextBlock Text="⏳" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+
+                        <TextBlock Text="Diseñando tu Planeación Didáctica NEM..."
+                                   FontSize="21" FontWeight="Bold" Foreground="#1E1E1E" FontFamily="Georgia"
+                                   TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,8"/>
+
+                        <TextBlock Text="{Binding EtapaGeneracionTexto}"
+                                   FontSize="14.5" FontWeight="SemiBold" Foreground="#C25A38"
+                                   TextAlignment="Center" TextWrapping="Wrap" Margin="0,0,0,16"/>
+
+                        <!-- Barra de progreso indeterminada -->
+                        <ProgressBar IsIndeterminate="True" Height="10" Width="380"
+                                     Foreground="#C25A38" Background="#F1E9DC" BorderThickness="0"
+                                     Margin="0,0,0,16"/>
+
+                        <!-- Contador y tiempo estimado -->
+                        <Border Background="#FAF7F2" BorderBrush="#E5D8C5" BorderThickness="1" CornerRadius="10"
+                                Padding="16,10" Margin="0,0,0,14">
+                            <TextBlock Text="{Binding TiempoTranscurridoGeneracionTexto}"
+                                       FontSize="13.5" FontWeight="Bold" Foreground="#334155"
+                                       TextAlignment="Center"/>
+                        </Border>
+
+                        <!-- Recordatorio anticipado de bajar -->
+                        <Border Background="#ECFDF5" BorderBrush="#A7F3D0" BorderThickness="1" CornerRadius="8"
+                                Padding="14,10">
+                            <TextBlock Text="💡 Por favor no cierres la ventana. Al terminar, recuerda desplazarte hacia abajo para ver tu planeación completa y exportarla a Google Docs o Word."
+                                       FontSize="12.5" Foreground="#065F46" TextAlignment="Center" TextWrapping="Wrap"/>
+                        </Border>
+                    </StackPanel>
+                </Border>
             </Grid>
 
         </Grid>
