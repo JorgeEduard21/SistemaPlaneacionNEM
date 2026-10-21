@@ -303,8 +303,8 @@
                                     <TextBlock Text="3" FontSize="15" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                                 </Border>
                                 <StackPanel Grid.Column="1" VerticalAlignment="Center">
-                                    <TextBlock Text="Copia el código generado (empieza con las letras AIza...)" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B"/>
-                                    <TextBlock Text="Te aparecerá una clave larga con letras y números. Haz clic en el botón «Copy» (Copiar) que viene ahí mismo para guardarla en tu portapapeles."
+                                    <TextBlock Text="Copia el código generado (tu clave de API)" FontSize="14.5" FontWeight="Bold" Foreground="#1E293B"/>
+                                    <TextBlock Text="Te aparecerá una clave con letras y números. Haz clic en el botón «Copy» (Copiar) que viene ahí mismo para guardarla en tu portapapeles."
                                                FontSize="13" Foreground="#475569" TextWrapping="Wrap" Margin="0,2,0,0"/>
                                 </StackPanel>
                             </Grid>
@@ -363,7 +363,7 @@
                                 <ColumnDefinition Width="10"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding ApiKeyInput, UpdateSourceTrigger=PropertyChanged}" Tag="Pega aquí tu clave: AIzaSy..." Margin="0"/>
+                            <TextBox Grid.Column="0" Style="{StaticResource TextBoxElegante}" Text="{Binding ApiKeyInput, UpdateSourceTrigger=PropertyChanged}" Tag="Pega aquí tu clave copiada de Google..." Margin="0"/>
                             <Button Grid.Column="2" Content="📋 Pegar clave copiada" Command="{Binding PegarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="14,0" Height="45" ToolTip="Pega automáticamente el texto que copiaste de Google AI Studio"/>
                             <Button Grid.Column="4" Content="Probar" Command="{Binding ProbarApiKeyCommand}" Style="{StaticResource BotonGris}" Padding="14,0" Height="45"/>
                             <Button Grid.Column="6" Content="Guardar y Activar mi Clave ✓" Command="{Binding GuardarApiKeyCommand}" Style="{StaticResource BotonNaranja}" Padding="20,0" Height="45"/>

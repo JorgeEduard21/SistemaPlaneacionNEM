@@ -761,7 +761,7 @@
                                                                             <Setter TargetName="TxtBadge" Property="Foreground" Value="White"/>
                                                                             <Setter TargetName="TxtBadge" Property="Text" Value="✓ Seleccionado"/>
                                                                         </Trigger>
-                                                                    </ControlTemplate.Triggers>
+                                                                    </ControlTemplate.Trigger
                                                                 </ControlTemplate>
                                                             </Setter.Value>
                                                         </Setter>
