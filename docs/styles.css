@@ -170,10 +170,6 @@ body {
   gap: 5px;
 }
 
-.btn-mobile-download {
-  display: none;
-}
-
 /* Nav Actions (Button + Toggle) */
 .nav-actions {
   display: flex;
@@ -184,15 +180,18 @@ body {
 
 .btn-nav {
   background: var(--color-primary);
-  color: white;
-  padding: 8px 18px;
-  font-size: 0.85rem;
+  color: #FFFFFF !important;
+  padding: 9px 20px;
+  font-size: 0.88rem;
   font-weight: 700;
   border-radius: var(--radius-md);
-  box-shadow: 0 3px 8px rgba(194, 90, 56, 0.22);
+  box-shadow: 0 3px 8px rgba(194, 90, 56, 0.25);
   white-space: nowrap;
   text-decoration: none;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-nav:hover {
@@ -1032,14 +1031,6 @@ body {
     background: #FAF7F2;
   }
 
-  .btn-mobile-download {
-    display: inline-flex;
-    width: 100%;
-    margin-top: 8px;
-    padding: 12px;
-    font-size: 0.95rem;
-  }
-
   .nav-toggle {
     display: flex;
   }
@@ -1097,7 +1088,9 @@ body {
   }
 
   .btn-nav {
-    display: none;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    border-radius: 8px;
   }
 
   .hero-cta,
